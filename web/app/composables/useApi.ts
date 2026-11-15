@@ -30,7 +30,8 @@ export async function api<T = any>(caminho: string, opcoes: FetchOptions<'json'>
   if (metodo !== 'GET' && !lerCookie('XSRF-TOKEN')) await csrf()
 
   try {
-    return await $fetch<T>(useRuntimeConfig().public.apiBase + '/api/v1' + caminho, {
+    // A API é o Laravel (não rotas do Nitro): o tipo de retorno vem de T, não da tipagem de rotas do Nuxt.
+    return (await $fetch(useRuntimeConfig().public.apiBase + '/api/v1' + caminho, {
       ...opcoes,
       credentials: 'include',
       headers: {
@@ -39,7 +40,7 @@ export async function api<T = any>(caminho: string, opcoes: FetchOptions<'json'>
         'X-XSRF-TOKEN': lerCookie('XSRF-TOKEN'),
         ...opcoes.headers,
       },
-    } as any)
+    } as any)) as T
   }
   catch (e: any) {
     const status = e?.response?.status

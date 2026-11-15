@@ -70,21 +70,35 @@ function irPara(p: Ponto, zoom = 15) {
 
 defineExpose({ irPara, enquadrar })
 
+// Mostrado no lugar do mapa quando ele não carrega (sem WebGL, sem internet, bloqueio do navegador).
+const falha = ref('')
+
 onMounted(async () => {
-  lib = await carregarMapLibre()
-  mapa = new lib.Map({
-    container: el.value!,
-    style: ESTILO_MAPA,
-    center: [-51.9, -14.2],
-    zoom: 3,
-    attributionControl: { compact: true },
-    dragRotate: false,
-    pitchWithRotate: false,
-  })
+  try {
+    lib = await carregarMapLibre()
+    mapa = new lib.Map({
+      container: el.value!,
+      style: ESTILO_MAPA,
+      center: [-51.9, -14.2],
+      zoom: 3,
+      attributionControl: { compact: true },
+      dragRotate: false,
+      pitchWithRotate: false,
+    })
+  }
+  catch (e) {
+    console.error('Mapa não abriu:', e)
+    falha.value = 'Não foi possível abrir o mapa. Verifique se o WebGL está ativado no navegador.'
+    return
+  }
   mapa.touchZoomRotate.disableRotation()
   mapa.on('load', () => {
     desenhar()
     enquadrar()
+  })
+  // Erro antes do estilo carregar = mapa base inacessível (internet ou bloqueio de tiles.openfreemap.org).
+  mapa.on('error', () => {
+    if (!mapa?.isStyleLoaded()) falha.value = 'Não foi possível carregar o mapa. Verifique a internet ou bloqueadores de conteúdo.'
   })
 })
 
@@ -94,8 +108,13 @@ onBeforeUnmount(() => mapa?.remove())
 
 <template>
   <div ref="el" class="mapa-gl" />
+  <p v-if="falha" class="mapa-falha" role="alert">{{ falha }}</p>
 </template>
 
 <style>
 .mapa-gl { width: 100%; height: 100%; }
+.mapa-falha {
+  position: absolute; top: 80px; left: 16px; right: 16px; margin: 0; z-index: 1;
+  background: var(--card); border-radius: var(--raio); padding: 14px; font-weight: 700; font-size: 14px; color: var(--destaque-texto);
+}
 </style>
