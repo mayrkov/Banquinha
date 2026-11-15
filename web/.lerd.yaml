@@ -1,0 +1,6 @@
+domains:
+  - banquinha
+secured: true
+proxy:
+  command: npm run servir
+  port: 3000

@@ -1,0 +1,90 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+// API Laravel. Em dev/preview as rotas /api e /sanctum passam pelo Nuxt (mesma origem = cookie do Sanctum funciona).
+const apiAlvo = process.env.NUXT_API_ALVO ?? 'http://api.banquinha.test'
+
+export default defineNuxtConfig({
+  compatibilityDate: '2025-07-15',
+  devtools: { enabled: true },
+  modules: ['@vite-pwa/nuxt'],
+  css: ['~/assets/css/main.css'],
+
+  app: {
+    head: {
+      htmlAttrs: { lang: 'pt-BR' },
+      title: 'Banquinha',
+      meta: [{ name: 'theme-color', content: '#EBEBEB' }],
+      link: [
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap' },
+      ],
+    },
+  },
+
+  runtimeConfig: {
+    // Base da API vista pelo navegador. Vazio = mesma origem (proxy abaixo).
+    public: { apiBase: '' },
+  },
+
+  routeRules: {
+    // D38: painel só no navegador.
+    '/painel/**': { ssr: false },
+    // Área logada do cliente também só no navegador (D38).
+    '/pedidos': { ssr: false },
+    '/pedidos/**': { ssr: false },
+    '/entrar': { ssr: false },
+    '/cadastro': { ssr: false },
+    '/v/*/reservar': { ssr: false },
+    '/api/**': { proxy: `${apiAlvo}/api/**` },
+    '/sanctum/**': { proxy: `${apiAlvo}/sanctum/**` },
+  },
+
+  vite: {
+    // Dev server atrás do proxy do Lerd (host-proxy site); ".lhr.life" = túnel `lerd share --localhost-run` (teste no celular).
+    server: { allowedHosts: ['banquinha.test', '.lhr.life'] },
+    optimizeDeps: { include: ['idb-keyval', 'qrcode', 'maplibre-gl'] },
+    // Worker do MapLibre é módulo ES (import entre arquivos).
+    worker: { format: 'es' },
+  },
+
+  nitro: {
+    // Casca SPA estática do painel, usada pelo service worker para abrir sem internet.
+    prerender: { routes: ['/painel'] },
+  },
+
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Banquinha — Painel do vendedor',
+      short_name: 'Banquinha',
+      lang: 'pt-BR',
+      start_url: '/painel',
+      scope: '/',
+      display: 'standalone',
+      background_color: '#EBEBEB',
+      theme_color: '#EBEBEB',
+      icons: [
+        { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+    },
+    generateSW: {
+      globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
+      // O módulo inclui **/_payload.json para páginas pré-renderizadas; a casca SPA do painel não gera payload.
+      globStrict: false,
+      navigateFallback: '/painel',
+      navigateFallbackAllowlist: [/^\/painel/],
+      navigateFallbackDenylist: [/^\/api/, /^\/sanctum/],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/,
+          handler: 'CacheFirst',
+          options: { cacheName: 'fontes', expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 } },
+        },
+      ],
+    },
+    devOptions: { enabled: false },
+  },
+})

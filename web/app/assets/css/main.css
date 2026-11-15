@@ -1,0 +1,106 @@
+/* Tema claro aprovado no protótipo (canvas). */
+:root {
+  --fundo: #EBEBEB;
+  --card: #FFFFFF;
+  --texto: #111111;
+  --texto-2: #3D3D3D;
+  --texto-3: #636363;
+  --linha: #DCDCDC;
+  --destaque: #FF3E41;
+  --destaque-texto: #C42326;
+  --raio-card: 16px;
+  --raio: 12px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: Montserrat, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a { color: var(--destaque-texto); }
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+  border-radius: var(--raio);
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+:focus-visible { outline: 3px solid var(--destaque-texto); outline-offset: 2px; }
+
+.btn {
+  min-height: 56px;
+  padding: 0 16px;
+  border: 0;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  font-size: 15px;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-escuro { background: var(--texto); color: #FFFFFF; }
+.btn-destaque { background: var(--destaque); color: var(--texto); }
+.btn-contorno { background: none; border: 2px solid #666666; color: var(--texto); }
+.btn-linha { background: none; border: 2px solid var(--destaque-texto); color: var(--destaque-texto); min-height: 44px; font-size: 13px; letter-spacing: 1px; }
+.btn:disabled { opacity: .45; }
+
+.titulo {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.campo { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; }
+.campo input, .campo select, .campo textarea {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--card);
+  font-weight: 500;
+  font-size: 16px; /* evita zoom automático no iOS */
+}
+.campo textarea { padding: 12px 14px; min-height: 88px; }
+.campo small { font-weight: 500; color: var(--texto-3); }
+
+.erro { color: var(--destaque-texto); font-weight: 700; font-size: 14px; margin: 0; }
+.dica { color: var(--texto-3); font-size: 13px; margin: 0; }
+
+.pagina-vazia { padding: 24px 16px; }
+
+.titulo-grande { margin: 0; font-size: 44px; font-weight: 900; line-height: .95; text-transform: uppercase; }
+.subtitulo { font-size: 18px; font-weight: 300; text-transform: uppercase; line-height: 1.2; }
+.rotulo-secao { margin: 0; font-size: 14px; font-weight: 900; letter-spacing: 2px; color: var(--texto-3); text-transform: uppercase; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.topo-cliente { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+.topo-cliente .marca { font-weight: 900; font-size: 18px; letter-spacing: 3px; text-transform: uppercase; text-align: center; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icone-btn { width: 44px; height: 44px; color: inherit; background: none; border: 0; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+.barra-fixa { position: sticky; bottom: 0; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: var(--fundo); border-top: 1px solid var(--linha); }
+.btn-bloco { width: 100%; }
+.btn-cinza { background: #DCDCDC; color: var(--texto); }
+
+/* Pontos dos mapas (MapLibre): vendedor e "você está aqui". */
+.ponto-vendedor {
+  width: 28px; height: 28px; border-radius: 50%; border: 4px solid #FFFFFF; background: #FF3E41; padding: 0; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+}
+.ponto-vendedor.esgotado { background: #666666; }
+.ponto-vendedor.ativo { width: 40px; height: 40px; border-width: 5px; box-shadow: 0 0 0 3px #C42326; }
+.ponto-vendedor.ativo::after {
+  content: attr(data-nome); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: #FF3E41; color: #111111; font: 900 12px/1 Montserrat, sans-serif; letter-spacing: 1px; text-transform: uppercase;
+  padding: 6px 10px; white-space: nowrap; border-radius: 6px;
+}
+.ponto-eu { display: block; width: 22px; height: 22px; border-radius: 50%; background: #5AA9FF; border: 4px solid #111111; }
