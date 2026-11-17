@@ -1,9 +1,10 @@
 <script setup lang="ts">
-interface ProdutoPublico { id: number, nome: string, descricao: string | null, cor: string | null, preco: number, disponivel: number }
+interface ProdutoPublico { id: number, nome: string, descricao: string | null, cor: string | null, foto_url: string | null, preco: number, disponivel: number }
 interface VendedorPublico {
   nome: string
   slug: string
   descricao: string | null
+  foto_url: string | null
   status: 'vendendo' | 'esgotado' | 'fora_de_atividade'
   taxa_entrega: number
   prazo_resposta_min: number
@@ -31,6 +32,8 @@ const atual = ref(0)
 const produtos = computed(() => v.value?.produtos ?? [])
 const loc = computed(() => v.value?.localizacao ?? null)
 const slide = computed(() => produtos.value[atual.value])
+// Com alguma foto, o carrossel mostra a bolinha do protótipo em todos os sabores (layout não pula entre slides).
+const temFotos = computed(() => produtos.value.some(p => p.foto_url))
 const q = (id: number) => (montado.value ? qtd(id) : 0)
 const contagem = computed(() => (montado.value ? produtos.value.reduce((n, p) => n + qtd(p.id), 0) : 0))
 const total = computed(() => produtos.value.reduce((n, p) => n + q(p.id) * p.preco, 0))
@@ -103,17 +106,24 @@ watch(produtos, (lista) => {
         <p class="status"><span class="ponto" aria-hidden="true" />{{ rotuloStatus }}</p>
 
         <template v-if="slide">
-          <div class="slide-meio">
+          <div class="slide-meio" :class="{ 'com-foto': temFotos }">
             <button class="icone-btn" aria-label="Sabor anterior" :disabled="produtos.length < 2" @click="ir(atual - 1)">
               <IconeVoltar />
             </button>
-            <div class="slide-textos" aria-live="polite">
+            <div v-if="temFotos" class="bolinha-foto">
+              <img v-if="slide.foto_url" :key="slide.id" :src="slide.foto_url" :alt="`Foto de ${slide.nome}`">
+            </div>
+            <div v-else class="slide-textos" aria-live="polite">
               <h1 class="slide-nome">{{ slide.nome }}</h1>
               <span v-if="slide.descricao" class="subtitulo">{{ slide.descricao }}</span>
             </div>
             <button class="icone-btn virar" aria-label="Próximo sabor" :disabled="produtos.length < 2" @click="ir(atual + 1)">
               <IconeVoltar />
             </button>
+          </div>
+          <div v-if="temFotos" class="slide-textos abaixo" aria-live="polite">
+            <h1 class="slide-nome">{{ slide.nome }}</h1>
+            <span v-if="slide.descricao" class="subtitulo">{{ slide.descricao }}</span>
           </div>
 
           <div class="slide-rodape">
@@ -146,10 +156,10 @@ watch(produtos, (lista) => {
 
       <section v-if="loc" class="secao">
         <p class="onde">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C42326" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--destaque-texto)" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
           Localização atualizada {{ haQuantoTempo(loc.atualizado_em) }}
         </p>
-        <MiniMapa :latitude="loc.latitude" :longitude="loc.longitude" />
+        <MiniMapa :latitude="loc.latitude" :longitude="loc.longitude" :foto="v.foto_url" />
       </section>
 
       <section v-if="produtos.length" class="secao">
@@ -218,6 +228,10 @@ watch(produtos, (lista) => {
 .ponto { width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
 .slide-meio { flex: 1; display: flex; align-items: center; gap: 4px; padding: 24px 4px; }
 .slide-meio .icone-btn:disabled { opacity: .3; }
+.slide-meio.com-foto { flex: 0 0 auto; justify-content: space-between; padding: 16px 4px 8px; }
+.bolinha-foto { width: min(230px, 58vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: rgba(0, 0, 0, .18); }
+.bolinha-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slide-textos.abaixo { flex: 1; padding: 8px 24px 20px; }
 .virar { transform: scaleX(-1); }
 .slide-textos { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .slide-nome { margin: 0; font-size: clamp(40px, 13vw, 64px); font-weight: 900; line-height: .95; text-transform: uppercase; overflow-wrap: anywhere; }

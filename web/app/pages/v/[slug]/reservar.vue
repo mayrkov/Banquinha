@@ -191,13 +191,13 @@ onMounted(async () => {
 .item-preco { font-weight: 300; font-size: 14px; }
 .passos { display: flex; align-items: center; gap: 4px; }
 .passos button { width: 44px; height: 44px; border: 0; font-size: 22px; font-weight: 900; }
-.menos { background: #DCDCDC; }
+.menos { background: var(--cinza); }
 .mais { background: var(--destaque); }
 .num { width: 24px; text-align: center; font-weight: 900; }
 .mais-sabores { padding: 8px 0; font-size: 14px; font-weight: 700; }
 .opcoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.opcoes button { height: 52px; border: 0; background: #DCDCDC; font-weight: 900; letter-spacing: 1.5px; font-size: 14px; text-transform: uppercase; }
-.opcoes button.on { background: var(--texto); color: #FFFFFF; }
+.opcoes button { height: 52px; border: 0; background: var(--cinza); font-weight: 900; letter-spacing: 1.5px; font-size: 14px; text-transform: uppercase; }
+.opcoes button.on { background: var(--texto); color: var(--texto-inverso); }
 .parada { background: var(--card); border-radius: var(--raio-card); padding: 14px; display: flex; gap: 12px; align-items: center; border: 2px solid transparent; }
 .parada.on { border-color: var(--destaque-texto); }
 .parada input { width: 22px; height: 22px; accent-color: var(--destaque-texto); }

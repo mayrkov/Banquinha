@@ -21,8 +21,12 @@ Route::prefix('v1/vendedor')->group(function () {
         Route::post('logout', [AuthVendedorController::class, 'logout']);
         Route::get('eu', [AuthVendedorController::class, 'eu']);
         Route::put('eu', [AuthVendedorController::class, 'atualizar']);
+        Route::post('eu/foto', [AuthVendedorController::class, 'foto']);
+        Route::delete('eu/foto', [AuthVendedorController::class, 'removerFoto']);
 
         Route::apiResource('produtos', ProdutoController::class)->only(['index', 'store', 'update']);
+        Route::post('produtos/{produto}/foto', [ProdutoController::class, 'foto']);
+        Route::delete('produtos/{produto}/foto', [ProdutoController::class, 'removerFoto']);
         Route::post('vendas', [VendaController::class, 'store']);
 
         Route::post('turno/iniciar', [TurnoController::class, 'iniciar']);

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Produto;
 use App\Models\Vendedor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -57,6 +59,55 @@ class VendedorPainelTest extends TestCase
 
         $this->getJson('/api/v1/vendedor/produtos')->assertOk()->assertJsonCount(1);
         $this->putJson("/api/v1/vendedor/produtos/{$doOutro->id}", ['preco' => 1])->assertNotFound();
+    }
+
+    public function test_foto_do_produto_troca_remove_e_aparece_na_pagina_publica(): void
+    {
+        Storage::fake('public');
+        $outro = $this->produto($this->vendedor('outro@teste.com'));
+        $this->actingAs($eu = $this->vendedor(), 'vendedor');
+        $eu->forceFill(['slug' => 'eu', 'em_atividade' => true])->save();
+        $p = $this->produto($eu);
+
+        $this->post("/api/v1/vendedor/produtos/{$p->id}/foto", ['foto' => UploadedFile::fake()->create('a.pdf', 10, 'application/pdf')], ['Accept' => 'application/json'])
+            ->assertUnprocessable();
+        $this->post("/api/v1/vendedor/produtos/{$outro->id}/foto", ['foto' => UploadedFile::fake()->image('a.jpg')], ['Accept' => 'application/json'])
+            ->assertNotFound();
+
+        $primeira = $this->post("/api/v1/vendedor/produtos/{$p->id}/foto", ['foto' => UploadedFile::fake()->image('a.jpg', 800, 800)], ['Accept' => 'application/json'])
+            ->assertOk()->assertJsonMissingPath('foto')->json('foto_url');
+        $this->assertStringStartsWith('/storage/produtos/', $primeira);
+
+        $segunda = $this->post("/api/v1/vendedor/produtos/{$p->id}/foto", ['foto' => UploadedFile::fake()->image('b.png')], ['Accept' => 'application/json'])
+            ->assertOk()->json('foto_url');
+        Storage::disk('public')->assertMissing(substr($primeira, 9));
+        Storage::disk('public')->assertExists(substr($segunda, 9));
+        $this->getJson('/api/v1/publico/vendedores/eu')->assertJsonPath('produtos.0.foto_url', $segunda);
+
+        $this->deleteJson("/api/v1/vendedor/produtos/{$p->id}/foto")->assertOk()->assertJsonPath('foto_url', null);
+        Storage::disk('public')->assertMissing(substr($segunda, 9));
+    }
+
+    public function test_foto_de_perfil_aparece_no_mapa_e_na_pagina(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($eu = $this->vendedor(), 'vendedor');
+        $eu->forceFill(['slug' => 'eu', 'em_atividade' => true])->save();
+
+        $this->post('/api/v1/vendedor/eu/foto', ['foto' => UploadedFile::fake()->create('a.pdf', 10, 'application/pdf')], ['Accept' => 'application/json'])
+            ->assertUnprocessable();
+        $primeira = $this->post('/api/v1/vendedor/eu/foto', ['foto' => UploadedFile::fake()->image('a.jpg')], ['Accept' => 'application/json'])
+            ->assertOk()->assertJsonMissingPath('foto')->json('foto_url');
+        $segunda = $this->post('/api/v1/vendedor/eu/foto', ['foto' => UploadedFile::fake()->image('b.jpg')], ['Accept' => 'application/json'])
+            ->assertOk()->json('foto_url');
+        Storage::disk('public')->assertMissing(substr($primeira, 9));
+        $this->assertStringStartsWith('/storage/vendedores/', $segunda);
+
+        $this->getJson('/api/v1/publico/vendedores')->assertJsonPath('0.foto_url', $segunda);
+        $this->getJson('/api/v1/publico/vendedores/eu')->assertJsonPath('foto_url', $segunda);
+
+        $this->deleteJson('/api/v1/vendedor/eu/foto')->assertOk()->assertJsonPath('foto_url', null);
+        Storage::disk('public')->assertMissing(substr($segunda, 9));
     }
 
     public function test_venda_presencial_desconta_estoque_e_e_idempotente(): void

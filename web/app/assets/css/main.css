@@ -8,9 +8,36 @@
   --linha: #DCDCDC;
   --destaque: #FF3E41;
   --destaque-texto: #C42326;
+  --sobre-destaque: #111111;
+  --texto-inverso: #FFFFFF;
+  --cinza: #DCDCDC;
+  --borda: #D0D0D0;
+  --apagado: #666666;
+  --apagado-fundo: #E4E4E4;
+  --fonte: Montserrat, system-ui, sans-serif;
   --raio-card: 16px;
   --raio: 12px;
   color-scheme: light;
+}
+
+/* Tema escuro do protótipo: black piano, destaque amarelo, Roboto. Ligado por data-tema (ver nuxt.config.ts). */
+:root[data-tema="escuro"] {
+  --fundo: #0A0A0A;
+  --card: #161616;
+  --texto: #F2F2EE;
+  --texto-2: #C9D1D5;
+  --texto-3: #9AA5AB;
+  --linha: #232323;
+  --destaque: #F5C542;
+  --destaque-texto: #F5C542;
+  --sobre-destaque: #0A0A0A;
+  --texto-inverso: #0A0A0A;
+  --cinza: #232323;
+  --borda: #2E2E2E;
+  --apagado: #6B777D;
+  --apagado-fundo: #111111;
+  --fonte: Roboto, system-ui, sans-serif;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -19,7 +46,7 @@ html, body {
   margin: 0;
   background: var(--fundo);
   color: var(--texto);
-  font-family: Montserrat, system-ui, sans-serif;
+  font-family: var(--fonte);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -49,9 +76,9 @@ button:disabled { cursor: not-allowed; }
   align-items: center;
   justify-content: center;
 }
-.btn-escuro { background: var(--texto); color: #FFFFFF; }
-.btn-destaque { background: var(--destaque); color: var(--texto); }
-.btn-contorno { background: none; border: 2px solid #666666; color: var(--texto); }
+.btn-escuro { background: var(--texto); color: var(--texto-inverso); }
+.btn-destaque { background: var(--destaque); color: var(--sobre-destaque); }
+.btn-contorno { background: none; border: 2px solid var(--apagado); color: var(--texto); }
 .btn-linha { background: none; border: 2px solid var(--destaque-texto); color: var(--destaque-texto); min-height: 44px; font-size: 13px; letter-spacing: 1px; }
 .btn:disabled { opacity: .45; }
 
@@ -89,18 +116,22 @@ button:disabled { cursor: not-allowed; }
 .icone-btn { width: 44px; height: 44px; color: inherit; background: none; border: 0; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
 .barra-fixa { position: sticky; bottom: 0; padding: 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); background: var(--fundo); border-top: 1px solid var(--linha); }
 .btn-bloco { width: 100%; }
-.btn-cinza { background: #DCDCDC; color: var(--texto); }
+.btn-cinza { background: var(--cinza); color: var(--texto); }
 
 /* Pontos dos mapas (MapLibre): vendedor e "você está aqui". */
 .ponto-vendedor {
-  width: 28px; height: 28px; border-radius: 50%; border: 4px solid #FFFFFF; background: #FF3E41; padding: 0; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 50%; border: 4px solid var(--texto-inverso); background: var(--destaque); padding: 0; cursor: pointer;
   box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
 }
-.ponto-vendedor.esgotado { background: #666666; }
-.ponto-vendedor.ativo { width: 40px; height: 40px; border-width: 5px; box-shadow: 0 0 0 3px #C42326; }
+.ponto-vendedor.esgotado { background: var(--apagado); }
+/* Com foto de perfil: maior e preenchida pela foto; esgotado fica em cinza. */
+.ponto-vendedor.com-foto { width: 40px; height: 40px; background-size: cover; background-position: center; background-color: var(--cinza); }
+.ponto-vendedor.com-foto.esgotado { filter: grayscale(1); }
+.ponto-vendedor.com-foto.ativo { width: 56px; height: 56px; }
+.ponto-vendedor.ativo { width: 40px; height: 40px; border-width: 5px; box-shadow: 0 0 0 3px var(--destaque-texto); }
 .ponto-vendedor.ativo::after {
   content: attr(data-nome); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
-  background: #FF3E41; color: #111111; font: 900 12px/1 Montserrat, sans-serif; letter-spacing: 1px; text-transform: uppercase;
+  background: var(--destaque); color: var(--sobre-destaque); font: 900 12px/1 var(--fonte); letter-spacing: 1px; text-transform: uppercase;
   padding: 6px 10px; white-space: nowrap; border-radius: 6px;
 }
-.ponto-eu { display: block; width: 22px; height: 22px; border-radius: 50%; background: #5AA9FF; border: 4px solid #111111; }
+.ponto-eu { display: block; width: 22px; height: 22px; border-radius: 50%; background: #5AA9FF; border: 4px solid var(--texto); }

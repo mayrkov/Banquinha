@@ -62,6 +62,7 @@ O `.lerd.yaml` já deixa o site em HTTPS local (`secured: true`), porque o naveg
 - O navegador chama `/api` e `/sanctum` na mesma origem; o proxy do Nuxt repassa para a API e o cookie de sessão do Sanctum funciona sem CORS.
 - `useApi` centraliza as chamadas e os erros; `useVendedor` e `useCliente` cuidam da sessão de cada tipo de conta.
 - A API devolve o objeto direto, sem envelope `data`.
+- As fotos dos produtos ficam no disco `public` do Laravel e o Nuxt repassa `/storage` para a API. Rode `lerd artisan storage:link` no `backend/` uma vez (e no deploy).
 - A referência gerada pelo Scramble fica em `http://api.banquinha.test/docs/api` (interface) e `/docs/api.json` (OpenAPI).
 
 ## PWA e offline

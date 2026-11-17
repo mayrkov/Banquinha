@@ -2,7 +2,7 @@
 definePageMeta({ layout: 'painel' })
 
 const route = useRoute()
-const { produtos, carregar, salvar } = useProdutos()
+const { produtos, carregar, salvar, enviarFoto, removerFoto } = useProdutos()
 const online = useOnline()
 
 const novo = route.params.id === 'novo'
@@ -10,6 +10,30 @@ const id = novo ? null : Number(route.params.id)
 const form = reactive({ nome: '', descricao: '', cor: '#5A3324', preco: '', estoque: '0', ativo: true })
 const erro = ref('')
 const salvando = ref(false)
+const foto = computed(() => produtos.value.find(x => x.id === id)?.foto_url ?? null)
+const erroFoto = ref('')
+const enviandoFoto = ref(false)
+
+async function mudarFoto(acao: () => Promise<unknown>) {
+  erroFoto.value = ''
+  enviandoFoto.value = true
+  try {
+    await acao()
+  }
+  catch (e) {
+    erroFoto.value = e instanceof ErroApi ? e.mensagem : e instanceof TypeError || !online.value ? 'Sem conexão. Tente de novo com internet.' : 'Não foi possível ler essa imagem. Tente uma foto JPG ou PNG.'
+  }
+  finally {
+    enviandoFoto.value = false
+  }
+}
+
+function escolherFoto(ev: Event) {
+  const campo = ev.target as HTMLInputElement
+  const arquivo = campo.files?.[0]
+  campo.value = '' // permite escolher o mesmo arquivo de novo
+  if (arquivo && id) mudarFoto(() => enviarFoto(id, arquivo))
+}
 
 function preencher() {
   const p = produtos.value.find(x => x.id === id)
@@ -55,6 +79,24 @@ onMounted(async () => {
       <h1 class="titulo">{{ novo ? 'Novo produto' : 'Editar produto' }}</h1>
     </header>
 
+    <section class="foto" aria-labelledby="titulo-foto">
+      <h2 id="titulo-foto" class="campo-rotulo">Foto do sabor</h2>
+      <div class="foto-linha">
+        <div class="bolinha" :style="{ background: form.cor }">
+          <img v-if="foto" :src="foto" alt="" width="112" height="112">
+        </div>
+        <div v-if="!novo" class="foto-acoes">
+          <label class="btn btn-cinza" :class="{ desligado: enviandoFoto || !online }">
+            {{ enviandoFoto ? 'Enviando…' : foto ? 'Trocar foto' : 'Escolher foto' }}
+            <input type="file" accept="image/jpeg,image/png,image/webp" class="sr" :disabled="enviandoFoto || !online" @change="escolherFoto">
+          </label>
+          <button v-if="foto" type="button" class="btn btn-contorno" :disabled="enviandoFoto || !online" @click="mudarFoto(() => removerFoto(id!))">Remover</button>
+        </div>
+        <p v-else class="dica">Salve o produto para adicionar a foto.</p>
+      </div>
+      <p v-if="erroFoto" class="erro" role="alert">{{ erroFoto }}</p>
+    </section>
+
     <form class="form" @submit.prevent="enviar">
       <label class="campo">Nome
         <input v-model="form.nome" required maxlength="255" placeholder="Ex.: Nutella">
@@ -91,6 +133,15 @@ onMounted(async () => {
 .form { display: flex; flex-direction: column; gap: 16px; }
 .dois { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .cor input { width: 88px; padding: 4px; }
+.foto { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.campo-rotulo { margin: 0; font-size: 14px; font-weight: 700; }
+.foto-linha { display: flex; align-items: center; gap: 16px; }
+.bolinha { width: 112px; height: 112px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+.bolinha img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-acoes { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.foto-acoes .btn { min-height: 48px; font-size: 13px; }
+.foto-acoes label:focus-within { outline: 3px solid var(--destaque-texto); outline-offset: 2px; }
+.desligado { opacity: .45; cursor: not-allowed; }
 .check { display: flex; align-items: center; gap: 10px; font-size: 14px; min-height: 44px; }
 .check input { width: 22px; height: 22px; accent-color: var(--destaque-texto); }
 </style>

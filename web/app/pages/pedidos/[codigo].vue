@@ -158,7 +158,7 @@ onBeforeUnmount(() => clearInterval(timer))
 .centro { align-items: center; }
 .etapas { margin: 0; padding: 8px 16px 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--texto-3); }
 .etapas li { display: flex; flex-direction: column; gap: 6px; }
-.barra { height: 4px; background: #D0D0D0; }
+.barra { height: 4px; background: var(--borda); }
 .feita { color: var(--texto-2); }
 .feita .barra { background: var(--texto); }
 .atual { color: var(--texto); }
@@ -169,8 +169,8 @@ onBeforeUnmount(() => clearInterval(timer))
 .copia { align-self: stretch; display: flex; gap: 8px; }
 .copia input { flex: 1; min-width: 0; height: 48px; border: 0; background: var(--card); padding: 0 12px; font-size: 14px; color: var(--texto-2); }
 .copia .btn { min-height: 48px; font-size: 13px; }
-.codigo { padding: 20px; border: 1px dashed #666666; border-radius: var(--raio-card); display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; }
+.codigo { padding: 20px; border: 1px dashed var(--apagado); border-radius: var(--raio-card); display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; }
 .codigo.ativo { border: 2px solid var(--destaque-texto); background: var(--card); }
-.digitos { font-size: 48px; font-weight: 900; letter-spacing: 12px; color: #666666; }
+.digitos { font-size: 48px; font-weight: 900; letter-spacing: 12px; color: var(--apagado); }
 .ativo .digitos { color: var(--texto); }
 </style>

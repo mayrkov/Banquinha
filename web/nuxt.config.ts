@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // API Laravel. Em dev/preview as rotas /api e /sanctum passam pelo Nuxt (mesma origem = cookie do Sanctum funciona).
 const apiAlvo = process.env.NUXT_API_ALVO ?? 'http://api.banquinha.test'
+// Fotos: em produção vêm do bucket público do Supabase; local, do disco public do Laravel.
+const fotosAlvo = process.env.NUXT_FOTOS_ALVO ?? `${apiAlvo}/storage`
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -17,8 +19,13 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&family=Roboto:wght@300;400;500;700;900&display=swap' },
       ],
+      // Aplica o tema escuro antes da primeira pintura (sem piscar claro). Ver composables/useTema.ts.
+      script: [{
+        innerHTML: `try{var t=localStorage.getItem('tema');if(t==='escuro'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.tema='escuro'}catch(e){}`,
+        tagPosition: 'head',
+      }],
     },
   },
 
@@ -38,6 +45,8 @@ export default defineNuxtConfig({
     '/v/*/reservar': { ssr: false },
     '/api/**': { proxy: `${apiAlvo}/api/**` },
     '/sanctum/**': { proxy: `${apiAlvo}/sanctum/**` },
+    // Fotos dos produtos (disco public do Laravel).
+    '/storage/**': { proxy: `${fotosAlvo}/**` },
   },
 
   vite: {

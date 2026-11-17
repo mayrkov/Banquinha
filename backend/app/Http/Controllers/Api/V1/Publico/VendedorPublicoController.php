@@ -23,6 +23,7 @@ class VendedorPublicoController extends Controller
                 'nome' => $v->nome,
                 'slug' => $v->slug,
                 'descricao' => $v->descricao,
+                'foto_url' => $v->foto_url,
                 'status' => $disponivel > 0 ? 'vendendo' : 'esgotado',
                 'cores' => $v->produtos->map(fn (Produto $p) => $p->cor)->values(),
                 'preco_min' => $v->produtos->min('preco'),
@@ -44,6 +45,7 @@ class VendedorPublicoController extends Controller
                 'nome' => $p->nome,
                 'descricao' => $p->descricao,
                 'cor' => $p->cor,
+                'foto_url' => $p->foto_url,
                 'preco' => $p->preco,
                 'disponivel' => max(0, $p->estoque - ($reservados[$p->id] ?? 0)),
             ]);
@@ -55,6 +57,7 @@ class VendedorPublicoController extends Controller
             'nome' => $vendedor->nome,
             'slug' => $vendedor->slug,
             'descricao' => $vendedor->descricao,
+            'foto_url' => $vendedor->foto_url,
             'status' => $status,
             'taxa_entrega' => $vendedor->taxa_entrega,
             'prazo_resposta_min' => $vendedor->prazo_resposta_min,

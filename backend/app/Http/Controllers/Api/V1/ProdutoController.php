@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Produto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProdutoController extends Controller
 {
@@ -28,6 +29,32 @@ class ProdutoController extends Controller
     {
         $produto = $request->user()->produtos()->findOrFail($produto);
         $produto->update($request->validate($this->regras(parcial: true)));
+
+        return $produto;
+    }
+
+    /** Envia ou troca a foto do produto. O painel já manda a imagem reduzida (quadrada, ~800 px). */
+    public function foto(Request $request, int $produto)
+    {
+        $produto = $request->user()->produtos()->findOrFail($produto);
+        $request->validate(['foto' => ['required', 'image', 'mimes:jpeg,png,webp', 'max:3072']]);
+
+        $antiga = $produto->foto;
+        $produto->forceFill(['foto' => $request->file('foto')->store('produtos', 'public')])->save();
+        if ($antiga) {
+            Storage::disk('public')->delete($antiga);
+        }
+
+        return $produto;
+    }
+
+    public function removerFoto(Request $request, int $produto)
+    {
+        $produto = $request->user()->produtos()->findOrFail($produto);
+        if ($produto->foto) {
+            Storage::disk('public')->delete($produto->foto);
+            $produto->forceFill(['foto' => null])->save();
+        }
 
         return $produto;
     }

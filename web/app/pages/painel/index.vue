@@ -234,11 +234,11 @@ onMounted(async () => {
 .grade { padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .sabor {
   position: relative; height: 128px; border: 0; padding: 14px;
-  background: #DCDCDC; color: var(--texto);
+  background: var(--cinza); color: var(--texto);
   display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left;
 }
 .sabor.escolhido { background: var(--destaque); }
-.sabor.esgotado { background: #E4E4E4; color: #666666; border: 1px dashed #D0D0D0; }
+.sabor.esgotado { background: var(--apagado-fundo); color: var(--apagado); border: 1px dashed var(--borda); }
 .sabor-nome { font-size: 20px; font-weight: 900; text-transform: uppercase; padding-right: 36px; line-height: 1.1; }
 .sabor-info { font-size: 14px; font-weight: 500; }
 .qtd {
@@ -256,7 +256,7 @@ onMounted(async () => {
 .linha-nome { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 16px; font-weight: 700; min-width: 0; }
 .preco { font-size: 13px; font-weight: 500; color: var(--texto-2); display: flex; align-items: center; gap: 4px; }
 .preco input { width: 64px; height: 28px; border: 0; background: var(--card); padding: 0 6px; font-size: 16px; border-radius: 8px; }
-.passo { width: 48px; height: 48px; border: 0; background: #DCDCDC; font-size: 24px; }
+.passo { width: 48px; height: 48px; border: 0; background: var(--cinza); font-size: 24px; }
 .num { width: 28px; text-align: center; font-size: 20px; font-weight: 900; }
 .total { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; color: var(--texto-2); }
 .total strong { font-size: 32px; font-weight: 900; color: var(--texto); }
@@ -264,7 +264,7 @@ onMounted(async () => {
 .formas .btn { min-height: 64px; padding: 0 4px; }
 .toast {
   position: fixed; left: 16px; right: 16px; bottom: 96px; margin: 0; z-index: 10;
-  background: var(--texto); color: #FFFFFF; padding: 14px; text-align: center; font-weight: 700; border-radius: var(--raio);
+  background: var(--texto); color: var(--texto-inverso); padding: 14px; text-align: center; font-weight: 700; border-radius: var(--raio);
 }
 
 .cobrar { flex: 1; display: flex; flex-direction: column; }

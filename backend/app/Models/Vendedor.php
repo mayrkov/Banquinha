@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -27,7 +28,15 @@ class Vendedor extends Authenticatable
         'prazo_resposta_min', 'taxa_entrega',
     ];
 
-    protected $hidden = ['senha', 'remember_token'];
+    protected $hidden = ['senha', 'remember_token', 'foto'];
+
+    protected $appends = ['foto_url'];
+
+    /** Relativo, como em Produto::fotoUrl(): o site serve /storage pela mesma origem. */
+    protected function fotoUrl(): Attribute
+    {
+        return Attribute::get(fn () => $this->foto ? '/storage/'.$this->foto : null);
+    }
 
     protected function casts(): array
     {

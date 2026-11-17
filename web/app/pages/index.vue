@@ -3,6 +3,7 @@ interface VendedorMapa {
   nome: string
   slug: string
   descricao: string | null
+  foto_url: string | null
   status: 'vendendo' | 'esgotado'
   cores: (string | null)[]
   preco_min: number | null
@@ -19,6 +20,7 @@ const { vendedor } = useVendedor()
 const conta = computed(() => cliente.value
   ? { to: '/pedidos', rotulo: 'Meus pedidos' }
   : vendedor.value ? { to: '/painel', rotulo: 'Painel do vendedor' } : { to: '/entrar', rotulo: 'Entrar' })
+const { escuro, alternar: alternarTema } = useTema()
 const folhaAberta = ref(true)
 
 const mapa = ref<{ irPara: (p: Ponto, zoom?: number) => void } | null>(null)
@@ -27,7 +29,7 @@ const selecionado = ref<string | null>(null)
 const erroLocal = ref('')
 
 const pontos = computed(() => data.value.filter(v => v.localizacao).map(v => ({
-  slug: v.slug, nome: v.nome, status: v.status, latitude: v.localizacao!.latitude, longitude: v.localizacao!.longitude,
+  slug: v.slug, nome: v.nome, foto_url: v.foto_url, status: v.status, latitude: v.localizacao!.latitude, longitude: v.localizacao!.longitude,
 })))
 const ordenados = computed(() => {
   const lista = [...data.value]
@@ -79,9 +81,15 @@ onBeforeUnmount(() => clearInterval(timer))
     <header class="topo">
       <span class="marca">BANQUINHA</span>
       <ClientOnly>
-        <NuxtLink :to="conta.to" class="conta" :aria-label="conta.rotulo">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>
-        </NuxtLink>
+        <div class="acoes">
+          <button class="conta" :aria-pressed="escuro" aria-label="Modo escuro" @click="alternarTema">
+            <svg v-if="escuro" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+            <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+          </button>
+          <NuxtLink :to="conta.to" class="conta" :aria-label="conta.rotulo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>
+          </NuxtLink>
+        </div>
       </ClientOnly>
     </header>
 
@@ -107,7 +115,7 @@ onBeforeUnmount(() => clearInterval(timer))
       <template v-if="ativo">
         <div class="card">
           <div class="cores">
-            <span v-for="(c, i) in ativo.cores.slice(0, 4)" :key="i" :style="{ background: c || '#DCDCDC' }" />
+            <span v-for="(c, i) in ativo.cores.slice(0, 4)" :key="i" :style="{ background: c || 'var(--cinza)' }" />
           </div>
           <span class="nome">{{ ativo.nome }}</span>
           <span class="subtitulo">{{ faixa(ativo) }}</span>
@@ -136,7 +144,7 @@ onBeforeUnmount(() => clearInterval(timer))
 </template>
 
 <style scoped>
-.inicio { position: relative; height: 100dvh; overflow: hidden; background: #F7F7F7; }
+.inicio { position: relative; height: 100dvh; overflow: hidden; background: var(--fundo); }
 .mapa { position: absolute; inset: 0; z-index: 0; }
 .topo {
   position: absolute; top: 0; left: 0; right: 0; z-index: 2; pointer-events: none;
@@ -147,8 +155,9 @@ onBeforeUnmount(() => clearInterval(timer))
 .marca { font-weight: 900; font-size: 20px; letter-spacing: 3px; background: var(--fundo); border-radius: var(--raio); padding: 8px 12px; }
 .conta, .centralizar {
   width: 44px; height: 44px; border-radius: var(--raio); background: var(--fundo); color: var(--texto);
-  display: flex; align-items: center; justify-content: center; border: 1px solid #D0D0D0;
+  display: flex; align-items: center; justify-content: center; border: 1px solid var(--borda);
 }
+.acoes { display: flex; gap: 8px; }
 .centralizar { position: absolute; right: 16px; bottom: calc(46dvh + 12px); z-index: 2; width: 48px; height: 48px; }
 .folha {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; max-height: 46dvh; overflow-y: auto;
@@ -156,7 +165,7 @@ onBeforeUnmount(() => clearInterval(timer))
   display: flex; flex-direction: column; gap: 14px; max-width: 640px; margin: 0 auto;
 }
 .alca { align-self: center; width: 88px; height: 28px; border: 0; background: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: -6px 0 -8px; }
-.alca span { width: 40px; height: 4px; border-radius: 2px; background: #B0B0B0; }
+.alca span { width: 40px; height: 4px; border-radius: 2px; background: var(--borda); }
 .folha.fechada { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
 .conteudo-folha { display: flex; flex-direction: column; gap: 14px; }
 .centralizar.baixo { bottom: 64px; }
@@ -169,6 +178,6 @@ onBeforeUnmount(() => clearInterval(timer))
 .status.esgotado { color: var(--texto-3); }
 .ponto { width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
 .outros { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; overflow-x: auto; }
-.outros button { min-height: 44px; padding: 0 14px; border: 1px solid #D0D0D0; background: var(--card); font-weight: 700; font-size: 13px; white-space: nowrap; }
+.outros button { min-height: 44px; padding: 0 14px; border: 1px solid var(--borda); background: var(--card); font-weight: 700; font-size: 13px; white-space: nowrap; }
 .outros button.on { border-color: var(--destaque-texto); color: var(--destaque-texto); }
 </style>

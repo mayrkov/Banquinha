@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class AuthVendedorController extends Controller
@@ -21,6 +22,32 @@ class AuthVendedorController extends Controller
     public function eu(Request $request)
     {
         return $request->user();
+    }
+
+    /** Envia ou troca a foto de perfil. O painel já manda a imagem reduzida (quadrada, ~800 px). */
+    public function foto(Request $request)
+    {
+        $request->validate(['foto' => ['required', 'image', 'mimes:jpeg,png,webp', 'max:3072']]);
+        $vendedor = $request->user();
+
+        $antiga = $vendedor->foto;
+        $vendedor->forceFill(['foto' => $request->file('foto')->store('vendedores', 'public')])->save();
+        if ($antiga) {
+            Storage::disk('public')->delete($antiga);
+        }
+
+        return $vendedor;
+    }
+
+    public function removerFoto(Request $request)
+    {
+        $vendedor = $request->user();
+        if ($vendedor->foto) {
+            Storage::disk('public')->delete($vendedor->foto);
+            $vendedor->forceFill(['foto' => null])->save();
+        }
+
+        return $vendedor;
     }
 
     public function atualizar(Request $request)

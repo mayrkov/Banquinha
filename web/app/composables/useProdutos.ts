@@ -5,6 +5,8 @@ export interface Produto {
   nome: string
   descricao: string | null
   cor: string | null
+  /** Caminho relativo (/storage/...) ou null. */
+  foto_url: string | null
   preco: number
   estoque: number
   ativo: boolean
@@ -32,9 +34,23 @@ export function useProdutos() {
   }
 
   async function salvar(id: number | null, dados: Partial<Produto>) {
-    const salvo = id
+    return guardar(id
       ? await api<Produto>(`/vendedor/produtos/${id}`, { method: 'PUT', body: dados })
-      : await api<Produto>('/vendedor/produtos', { method: 'POST', body: dados })
+      : await api<Produto>('/vendedor/produtos', { method: 'POST', body: dados }))
+  }
+
+  async function enviarFoto(id: number, arquivo: File) {
+    const corpo = new FormData()
+    corpo.append('foto', await reduzirFoto(arquivo), 'foto.jpg')
+    return guardar(await api<Produto>(`/vendedor/produtos/${id}/foto`, { method: 'POST', body: corpo }))
+  }
+
+  async function removerFoto(id: number) {
+    return guardar(await api<Produto>(`/vendedor/produtos/${id}/foto`, { method: 'DELETE' }))
+  }
+
+  /** Atualiza a lista e o cache do aparelho com o produto salvo. */
+  async function guardar(salvo: Produto) {
     const i = produtos.value.findIndex(p => p.id === salvo.id)
     if (i >= 0) produtos.value[i] = salvo
     else produtos.value.push(salvo)
@@ -42,5 +58,5 @@ export function useProdutos() {
     return salvo
   }
 
-  return { produtos, carregar, salvar }
+  return { produtos, carregar, salvar, enviarFoto, removerFoto }
 }

@@ -3,7 +3,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Map as MapaGL, Marker } from 'maplibre-gl'
 
-const props = defineProps<{ latitude: number, longitude: number }>()
+const props = defineProps<{ latitude: number, longitude: number, foto?: string | null }>()
 const el = ref<HTMLDivElement | null>(null)
 let mapa: MapaGL | null = null
 let marcador: Marker | null = null
@@ -12,13 +12,15 @@ onMounted(async () => {
   const lib = await carregarMapLibre()
   mapa = new lib.Map({
     container: el.value!,
-    style: ESTILO_MAPA,
+    style: estiloMapa(),
     center: [props.longitude, props.latitude],
     zoom: 16,
     interactive: false,
     attributionControl: { compact: true },
   })
-  marcador = new lib.Marker({ element: Object.assign(document.createElement('span'), { className: 'ponto-vendedor' }) })
+  const ponto = Object.assign(document.createElement('span'), { className: props.foto ? 'ponto-vendedor com-foto' : 'ponto-vendedor' })
+  if (props.foto) ponto.style.backgroundImage = `url("${props.foto}")`
+  marcador = new lib.Marker({ element: ponto })
     .setLngLat([props.longitude, props.latitude]).addTo(mapa)
 })
 

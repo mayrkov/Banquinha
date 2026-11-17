@@ -8,6 +8,8 @@ export interface Vendedor {
   prazo_resposta_min: number
   telefone: string | null
   descricao: string | null
+  /** Foto de perfil (/storage/...), mostrada no lugar do ponto no mapa. */
+  foto_url: string | null
   chave_pix: string | null
   nome_recebedor_pix: string | null
   cidade_recebedor_pix: string | null
@@ -53,6 +55,16 @@ export function useVendedor() {
     salvar(await api<Vendedor>('/vendedor/eu', { method: 'PUT', body: dados }))
   }
 
+  async function enviarFoto(arquivo: File) {
+    const corpo = new FormData()
+    corpo.append('foto', await reduzirFoto(arquivo), 'foto.jpg')
+    salvar(await api<Vendedor>('/vendedor/eu/foto', { method: 'POST', body: corpo }))
+  }
+
+  async function removerFoto() {
+    salvar(await api<Vendedor>('/vendedor/eu/foto', { method: 'DELETE' }))
+  }
+
   async function turno(acao: 'iniciar' | 'encerrar') {
     salvar(await api<Vendedor>(`/vendedor/turno/${acao}`, { method: 'POST' }))
   }
@@ -66,5 +78,5 @@ export function useVendedor() {
     }
   }
 
-  return { vendedor: readonly(vendedor), definir: salvar, atualizar, salvarPerfil, turno, sair, esquecer: () => salvar(null) }
+  return { vendedor: readonly(vendedor), definir: salvar, atualizar, salvarPerfil, enviarFoto, removerFoto, turno, sair, esquecer: () => salvar(null) }
 }

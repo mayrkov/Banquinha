@@ -3,7 +3,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Map as MapaGL, Marker } from 'maplibre-gl'
 
-export interface PontoVendedor { slug: string, nome: string, status: 'vendendo' | 'esgotado', latitude: number, longitude: number }
+export interface PontoVendedor { slug: string, nome: string, foto_url: string | null, status: 'vendendo' | 'esgotado', latitude: number, longitude: number }
 
 const props = defineProps<{ vendedores: PontoVendedor[], ativo: string | null, eu: Ponto | null }>()
 const emit = defineEmits<{ escolher: [slug: string] }>()
@@ -37,6 +37,9 @@ function desenhar() {
     e.setAttribute('aria-label', `${v.nome}, ${v.status === 'vendendo' ? 'vendendo agora' : 'esgotado hoje'}`)
     e.dataset.nome = v.nome
     e.classList.toggle('esgotado', v.status === 'esgotado')
+    // Foto de perfil no lugar do ponto.
+    e.style.backgroundImage = v.foto_url ? `url("${v.foto_url}")` : ''
+    e.classList.toggle('com-foto', !!v.foto_url)
     e.classList.toggle('ativo', v.slug === props.ativo)
   }
   for (const [slug, m] of marcadores) {
@@ -78,7 +81,7 @@ onMounted(async () => {
     lib = await carregarMapLibre()
     mapa = new lib.Map({
       container: el.value!,
-      style: ESTILO_MAPA,
+      style: estiloMapa(),
       center: [-51.9, -14.2],
       zoom: 3,
       attributionControl: { compact: true },
@@ -103,6 +106,9 @@ onMounted(async () => {
 })
 
 watch(() => [props.vendedores, props.ativo, props.eu], desenhar, { deep: true })
+// Troca só o mapa base; os pontos são elementos HTML e continuam no lugar.
+const { escuro } = useTema()
+watch(escuro, () => mapa?.setStyle(estiloMapa()))
 onBeforeUnmount(() => mapa?.remove())
 </script>
 

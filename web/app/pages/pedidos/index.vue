@@ -114,17 +114,17 @@ onBeforeUnmount(() => clearInterval(timer))
   display: flex; flex-direction: column; gap: 10px; color: inherit; text-decoration: none;
 }
 .pedido.destaque { border-color: var(--destaque-texto); }
-.pedido.encerrado { background: none; border: 1px solid #D0D0D0; gap: 6px; }
+.pedido.encerrado { background: none; border: 1px solid var(--borda); gap: 6px; }
 .linha-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.selo { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; background: #D0D0D0; border-radius: 999px; padding: 5px 10px; text-transform: uppercase; }
+.selo { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; background: var(--borda); border-radius: 999px; padding: 5px 10px; text-transform: uppercase; }
 .selo.aceito { background: var(--destaque); }
-.selo.pago { background: var(--texto); color: #FFFFFF; }
+.selo.pago { background: var(--texto); color: var(--texto-inverso); }
 .selo-simples { font-size: 12px; font-weight: 900; letter-spacing: 1.5px; color: var(--texto-3); text-transform: uppercase; }
 .amostras { display: flex; gap: 6px; flex-wrap: wrap; }
 .amostra { width: 28px; height: 28px; border-radius: 8px; }
 .itens { font-size: 17px; font-weight: 900; text-transform: uppercase; }
 .info { font-weight: 300; font-size: 15px; }
 .encerrado .info { color: var(--texto-2); }
-.btn-cancelar { min-height: 44px; background: none; border: 1px solid #666666; font-weight: 700; letter-spacing: 1px; font-size: 13px; text-transform: uppercase; }
+.btn-cancelar { min-height: 44px; background: none; border: 1px solid var(--apagado); font-weight: 700; letter-spacing: 1px; font-size: 13px; text-transform: uppercase; }
 .acao { min-height: 44px; display: flex; align-items: center; text-decoration: none; color: var(--destaque-texto); font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
 </style>
