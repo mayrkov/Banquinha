@@ -1,7 +1,9 @@
 # Imagem de produção (Render). FrankenPHP = servidor web + PHP num processo só.
 FROM dunglas/frankenphp:php8.5
 
-RUN install-php-extensions pdo_pgsql opcache zip intl
+RUN install-php-extensions pdo_pgsql opcache zip intl \
+    # Render roda com no-new-privileges: binário com capability falha ("Operation not permitted"). Porta alta não precisa dela.
+    && setcap -r /usr/local/bin/frankenphp
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
