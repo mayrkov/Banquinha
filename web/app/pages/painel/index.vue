@@ -116,6 +116,11 @@ onMounted(async () => {
 <template>
   <!-- Carrinho -->
   <section v-if="etapa === 'carrinho'" class="pdv">
+    <div class="bloco cab">
+      <h1 class="titulo-pagina">Nova venda</h1>
+      <span class="dica">{{ ativos.length && !itens.length ? 'Toque no sabor para somar.' : resumo }}</span>
+    </div>
+
     <div class="grade">
       <button
         v-for="p in ativos"
@@ -125,22 +130,26 @@ onMounted(async () => {
         :disabled="disponivel(p.id) <= 0"
         @click="somar(p.id, 1)"
       >
-        <span class="sabor-nome">{{ p.nome }}</span>
-        <span class="sabor-info">
-          <template v-if="disponivel(p.id) > 0">{{ formatarBRL(p.preco) }} · restam {{ disponivel(p.id) }}</template>
-          <template v-else>esgotado</template>
-          <template v-if="reservado(p.id)"> ({{ reservado(p.id) }} reservados)</template>
+        <span class="sabor-topo">
+          <span class="amostra" :style="{ background: corDoProduto(p) }" />
+          <span v-if="carrinho.has(p.id)" class="qtd">{{ carrinho.get(p.id)!.quantidade }}</span>
         </span>
-        <span v-if="carrinho.has(p.id)" class="qtd">{{ carrinho.get(p.id)!.quantidade }}</span>
+        <span class="sabor-textos">
+          <span class="sabor-nome">{{ p.nome }}</span>
+          <span class="sabor-info">
+            <template v-if="disponivel(p.id) > 0">{{ formatarBRL(p.preco) }} · restam {{ disponivel(p.id) }}</template>
+            <template v-else>esgotado</template>
+            <template v-if="reservado(p.id)"> ({{ reservado(p.id) }} reservados)</template>
+          </span>
+        </span>
       </button>
     </div>
 
-    <p v-if="!ativos.length" class="dica vazio">
+    <p v-if="!ativos.length" class="bloco dica">
       Nenhum produto ativo. <NuxtLink to="/painel/produtos">Cadastrar produtos</NuxtLink>
     </p>
-    <p v-else-if="!itens.length" class="dica vazio">Toque no sabor para somar.</p>
 
-    <div class="rodape">
+    <div class="bloco bloco-preto rodape">
       <div v-for="[id, item] in itens" :key="id" class="linha">
         <div class="linha-nome">
           <span>{{ nome(id) }}</span>
@@ -154,9 +163,11 @@ onMounted(async () => {
             cada
           </label>
         </div>
-        <button class="passo" :aria-label="`Tirar um ${nome(id)}`" @click="somar(id, -1)">−</button>
-        <span class="num">{{ item.quantidade }}</span>
-        <button class="passo" :aria-label="`Adicionar um ${nome(id)}`" :disabled="item.quantidade >= disponivel(id)" @click="somar(id, 1)">+</button>
+        <div class="passos">
+          <button class="menos" :aria-label="`Tirar um ${nome(id)}`" @click="somar(id, -1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12h14" /></svg></button>
+          <span class="num">{{ item.quantidade }}</span>
+          <button class="mais" :aria-label="`Adicionar um ${nome(id)}`" :disabled="item.quantidade >= disponivel(id)" @click="somar(id, 1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
+        </div>
       </div>
 
       <div class="total">
@@ -165,9 +176,9 @@ onMounted(async () => {
       </div>
 
       <div class="formas">
-        <button class="btn btn-escuro" :disabled="!total" @click="abrirPix">Pix</button>
-        <button class="btn btn-escuro" :disabled="!total" @click="etapa = 'dinheiro'">Dinheiro</button>
-        <button class="btn btn-escuro" :disabled="!total" @click="etapa = 'cartao'">Cartão</button>
+        <button class="btn btn-destaque" :disabled="!total" @click="abrirPix">Pix</button>
+        <button class="btn forma" :disabled="!total" @click="etapa = 'dinheiro'">Dinheiro</button>
+        <button class="btn forma" :disabled="!total" @click="etapa = 'cartao'">Cartão</button>
       </div>
     </div>
     <p v-if="aviso" class="toast" role="status">{{ aviso }}</p>
@@ -175,19 +186,19 @@ onMounted(async () => {
 
   <!-- Telas de cobrança -->
   <section v-else class="cobrar">
-    <header class="cobrar-topo">
-      <button v-if="etapa !== 'cartao-confirmar'" class="voltar" aria-label="Voltar para a venda" @click="etapa = 'carrinho'">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-      </button>
-      <h1 class="titulo">
-        {{ etapa === 'pix' ? 'Cobrar com Pix' : etapa === 'dinheiro' ? 'Cobrar em dinheiro' : 'Cobrar no cartão' }}
-      </h1>
-    </header>
-
-    <div class="cobrar-meio">
+    <TopoBloco
+      escuro
+      :sem-voltar="etapa === 'cartao-confirmar'"
+      :ao-voltar="() => { etapa = 'carrinho' }"
+      rotulo-voltar="Voltar para a venda"
+      :marca="etapa === 'pix' ? 'Cobrar com Pix' : etapa === 'dinheiro' ? 'Cobrar em dinheiro' : 'Cobrar no cartão'"
+      :legenda="resumo"
+    >
+      <span class="rotulo-claro">Valor</span>
       <span class="valor">{{ formatarBRL(total) }}</span>
-      <span class="dica">{{ resumo }}</span>
+    </TopoBloco>
 
+    <div class="bloco cobrar-meio">
       <template v-if="etapa === 'pix'">
         <img v-if="qrPix" :src="qrPix" alt="QR Code Pix com o valor da venda" class="qr">
         <p v-else-if="!pixConfigurado" class="erro">
@@ -196,7 +207,7 @@ onMounted(async () => {
         <p class="dica centro">Mostre a tela ao cliente. Confira no app do banco antes de confirmar.</p>
       </template>
 
-      <p v-else-if="etapa === 'dinheiro'" class="dica centro">Recebeu o valor em dinheiro?</p>
+      <p v-else-if="etapa === 'dinheiro'" class="pergunta">Recebeu o valor em dinheiro?</p>
 
       <template v-else-if="etapa === 'cartao'">
         <p class="dica centro">
@@ -214,69 +225,74 @@ onMounted(async () => {
       </template>
     </div>
 
-    <div v-if="etapa !== 'cartao'" class="duas acoes">
-      <button class="btn btn-contorno" @click="etapa === 'cartao-confirmar' ? limpar() : (etapa = 'carrinho')">
+    <div v-if="etapa !== 'cartao'" class="acoes">
+      <button class="btn btn-branco" @click="etapa === 'cartao-confirmar' ? limpar() : (etapa = 'carrinho')">
         {{ etapa === 'cartao-confirmar' ? 'Não' : 'Cancelar' }}
       </button>
       <button
-        class="btn btn-destaque"
+        class="btn btn-destaque btn-seta confirmar"
         :disabled="etapa === 'pix' && !qrPix"
         @click="registrar(etapa === 'pix' ? 'pix' : etapa === 'dinheiro' ? 'dinheiro' : 'cartao')"
       >
         {{ etapa === 'cartao-confirmar' ? 'Sim' : etapa === 'dinheiro' ? 'Recebido' : 'Pago' }}
+        <span class="bolinha"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg></span>
       </button>
     </div>
   </section>
 </template>
 
 <style scoped>
-.pdv { flex: 1; display: flex; flex-direction: column; }
-.grade { padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pdv { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.cab { gap: 4px; }
+.titulo-pagina { margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -1px; line-height: 1.05; }
+.grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .sabor {
-  position: relative; height: 128px; border: 0; padding: 14px;
-  background: var(--cinza); color: var(--texto);
+  height: 128px; border: 0; border-radius: var(--raio-card); padding: 14px;
+  background: var(--card); color: var(--texto);
   display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left;
 }
-.sabor.escolhido { background: var(--destaque); }
-.sabor.esgotado { background: var(--apagado-fundo); color: var(--apagado); border: 1px dashed var(--borda); }
-.sabor-nome { font-size: 20px; font-weight: 900; text-transform: uppercase; padding-right: 36px; line-height: 1.1; }
-.sabor-info { font-size: 14px; font-weight: 500; }
-.qtd {
-  position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 18px;
-  background: var(--fundo); color: var(--destaque-texto); font-size: 18px; font-weight: 900;
-  display: flex; align-items: center; justify-content: center;
-}
-.vazio { padding: 0 16px; }
-.rodape {
-  margin-top: auto; padding: 16px; border-top: 1px solid var(--linha);
-  display: flex; flex-direction: column; gap: 12px; background: var(--fundo);
-  position: sticky; bottom: 64px;
-}
+.sabor.escolhido { background: var(--preto); color: var(--sobre-preto); }
+.sabor.esgotado { background: none; color: var(--texto-3); border: 1px dashed var(--apagado); }
+.sabor.esgotado .amostra { opacity: .4; }
+.sabor-topo { display: flex; justify-content: space-between; width: 100%; }
+.amostra { width: 32px; height: 32px; border-radius: 50%; }
+.qtd { width: 36px; height: 36px; border-radius: 50%; background: var(--destaque); color: var(--sobre-destaque); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.sabor-textos { display: flex; flex-direction: column; gap: 2px; }
+.sabor-nome { font-size: 18px; font-weight: 600; line-height: 1.1; }
+.sabor-info { font-size: 13px; opacity: .75; }
+.rodape { margin-top: auto; position: sticky; bottom: 88px; gap: 14px; }
 .linha { display: flex; align-items: center; gap: 10px; }
-.linha-nome { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 16px; font-weight: 700; min-width: 0; }
-.preco { font-size: 13px; font-weight: 500; color: var(--texto-2); display: flex; align-items: center; gap: 4px; }
-.preco input { width: 64px; height: 28px; border: 0; background: var(--card); padding: 0 6px; font-size: 16px; border-radius: 8px; }
-.passo { width: 48px; height: 48px; border: 0; background: var(--cinza); font-size: 24px; }
-.num { width: 28px; text-align: center; font-size: 20px; font-weight: 900; }
-.total { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; color: var(--texto-2); }
-.total strong { font-size: 32px; font-weight: 900; color: var(--texto); }
-.formas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.formas .btn { min-height: 64px; padding: 0 4px; }
+.linha-nome { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 16px; font-weight: 500; min-width: 0; }
+.preco { font-size: 13px; color: #A6A6A6; display: flex; align-items: center; gap: 4px; }
+.preco input { width: 72px; height: 32px; border: 0; background: #2A2A2A; color: #FFFFFF; padding: 0 10px; font-size: 16px; }
+.passos { background: #2A2A2A; border-radius: var(--pilula); padding: 4px; display: flex; align-items: center; gap: 4px; }
+.passos button { width: 44px; height: 44px; border: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.passos button:disabled { opacity: .4; }
+.menos { background: #3A3A3A; color: #FFFFFF; }
+.mais { background: #FFFFFF; color: #111111; }
+.num { width: 26px; text-align: center; font-size: 18px; font-weight: 600; }
+.total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; border-top: 1px solid #2A2A2A; font-size: 14px; color: #A6A6A6; }
+.linha + .total, .total:first-child { border-top: 0; padding-top: 0; }
+.total strong { font-size: 34px; font-weight: 600; color: var(--destaque); letter-spacing: -0.5px; }
+.formas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.formas .btn { min-height: 56px; padding: 0 4px; font-size: 15px; }
+.forma { background: #2A2A2A; color: #FFFFFF; }
 .toast {
-  position: fixed; left: 16px; right: 16px; bottom: 96px; margin: 0; z-index: 10;
-  background: var(--texto); color: var(--texto-inverso); padding: 14px; text-align: center; font-weight: 700; border-radius: var(--raio);
+  position: fixed; left: 16px; right: 16px; bottom: 100px; margin: 0; z-index: 10;
+  background: var(--preto); color: var(--sobre-preto); padding: 16px; text-align: center; font-weight: 600; border-radius: var(--pilula);
 }
 
-.cobrar { flex: 1; display: flex; flex-direction: column; }
-.cobrar-topo { height: 64px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 16px; }
-.voltar { width: 44px; height: 44px; margin-left: -8px; border: 0; background: none; display: flex; align-items: center; justify-content: center; }
-.cobrar-meio { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 0 24px; }
-.valor { font-size: 56px; font-weight: 900; }
-.qr { width: 280px; height: 280px; border-radius: var(--raio-card); background: var(--card); padding: 12px; }
+.cobrar { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.rotulo-claro { font-size: 13px; color: #A6A6A6; }
+.valor { font-size: 56px; font-weight: 600; color: var(--destaque); letter-spacing: -2px; line-height: 1; }
+.cobrar-meio { flex: 1; align-items: center; justify-content: center; gap: 16px; padding: 20px; }
+.qr { width: 270px; height: 270px; border-radius: 24px; background: #FFFFFF; padding: 12px; }
 .centro { text-align: center; line-height: 1.5; font-size: 14px; }
-.pergunta { margin: 0; font-size: 24px; font-weight: 900; }
+.pergunta { margin: 0; font-size: 24px; font-weight: 600; text-align: center; }
 .duas { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .duas .btn { min-height: 64px; }
-.acoes { padding: 16px; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.acoes { display: flex; gap: 8px; }
+.acoes .btn { min-height: 64px; flex: 1; }
+.acoes .confirmar { flex: 2; }
+.btn-branco { background: var(--card); color: var(--texto); }
 </style>

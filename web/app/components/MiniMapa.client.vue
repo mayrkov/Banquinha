@@ -39,9 +39,9 @@ onBeforeUnmount(() => mapa?.remove())
 </template>
 
 <style scoped>
-.mini-mapa { position: relative; height: 160px; border-radius: var(--raio-card); overflow: hidden; background: var(--card); }
+.mini-mapa { position: relative; height: 160px; border-radius: var(--raio); overflow: hidden; background: var(--card); }
 .abrir-mapa {
-  position: absolute; right: 8px; bottom: 8px; z-index: 2; background: var(--fundo); color: var(--texto);
-  font-size: 12px; font-weight: 700; letter-spacing: 1px; padding: 10px 12px; text-decoration: none; text-transform: uppercase;
+  position: absolute; right: 8px; bottom: 8px; z-index: 2; background: var(--preto); color: var(--sobre-preto);
+  font-size: 13px; font-weight: 600; padding: 12px 16px; border-radius: var(--pilula); text-decoration: none;
 }
 </style>

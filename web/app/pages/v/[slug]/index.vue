@@ -66,25 +66,21 @@ watch(produtos, (lista) => {
 </script>
 
 <template>
-  <main v-if="v" class="pagina">
+  <main v-if="v" class="pagina-bloco">
     <!-- Fora de atividade -->
     <template v-if="v.status === 'fora_de_atividade'">
-      <header class="topo-cliente">
-        <NuxtLink to="/" class="icone-btn" aria-label="Voltar ao início"><IconeVoltar /></NuxtLink>
-        <span class="marca">{{ v.nome }}</span>
-        <span class="icone-btn" />
-      </header>
-      <div class="ops">
-        <h1 class="titulo-grande">Ops!</h1>
-        <p class="subtitulo">O vendedor não está em atividade no momento</p>
-      </div>
-      <section v-if="v.paradas.length" class="secao">
-        <h2 class="rotulo-secao">Próxima parada</h2>
-        <div class="parada-grande">
-          <span class="parada-local">{{ v.paradas[0]!.local }}</span>
-          <span class="subtitulo">{{ quandoParada(v.paradas[0]!) }}</span>
-        </div>
+      <TopoBloco cinza voltar="/" rotulo-voltar="Voltar ao mapa" :marca="v.nome" legenda="offline" titulo="Ops! Fora de atividade">
+        <span class="ops-sub">O vendedor não está vendendo agora. Veja onde ele vai estar.</span>
+      </TopoBloco>
+      <section v-if="v.paradas.length" class="bloco bloco-preto proxima">
+        <h2 class="rot-claro">Próxima parada</h2>
+        <span class="proxima-local">{{ v.paradas[0]!.local }}</span>
+        <span class="proxima-quando">{{ quandoParada(v.paradas[0]!) }}</span>
       </section>
+      <NuxtLink to="/" class="btn btn-destaque btn-seta outros">
+        Ver outros vendedores
+        <span class="bolinha"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
+      </NuxtLink>
     </template>
 
     <template v-else>
@@ -94,20 +90,21 @@ watch(produtos, (lista) => {
         aria-label="Sabores de hoje"
         :style="{ background: slide ? corDoProduto(slide) : '#111111' }"
       >
-        <header class="topo-cliente">
-          <NuxtLink to="/" class="icone-btn" aria-label="Voltar ao início"><IconeVoltar /></NuxtLink>
-          <span class="marca">{{ v.nome }}</span>
-          <NuxtLink :to="`/v/${slug}/reservar`" class="icone-btn" :aria-label="`Reserva, ${contagem} itens`">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 4h2l2.5 11h11L21 8H7" /><circle cx="9" cy="19.5" r="1.5" /><circle cx="17" cy="19.5" r="1.5" /></svg>
+        <header class="slide-topo">
+          <NuxtLink to="/" class="voltar" aria-label="Voltar ao início"><IconeVoltar /></NuxtLink>
+          <span class="topo-textos">
+            <span class="topo-nome">{{ v.nome }}</span>
+            <span class="topo-status"><span class="ponto" aria-hidden="true" />{{ rotuloStatus }}</span>
+          </span>
+          <NuxtLink :to="`/v/${slug}/reservar`" class="carrinho" :aria-label="`Reserva, ${contagem} itens`">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 4h2l2.5 11h11L21 8H7" /><circle cx="9" cy="19.5" r="1.5" /><circle cx="17" cy="19.5" r="1.5" /></svg>
             <span v-if="contagem" class="badge">{{ contagem }}</span>
           </NuxtLink>
         </header>
 
-        <p class="status"><span class="ponto" aria-hidden="true" />{{ rotuloStatus }}</p>
-
         <template v-if="slide">
           <div class="slide-meio" :class="{ 'com-foto': temFotos }">
-            <button class="icone-btn" aria-label="Sabor anterior" :disabled="produtos.length < 2" @click="ir(atual - 1)">
+            <button class="seta-slide" aria-label="Sabor anterior" :disabled="produtos.length < 2" @click="ir(atual - 1)">
               <IconeVoltar />
             </button>
             <div v-if="temFotos" class="bolinha-foto">
@@ -115,15 +112,15 @@ watch(produtos, (lista) => {
             </div>
             <div v-else class="slide-textos" aria-live="polite">
               <h1 class="slide-nome">{{ slide.nome }}</h1>
-              <span v-if="slide.descricao" class="subtitulo">{{ slide.descricao }}</span>
+              <span v-if="slide.descricao" class="slide-desc">{{ slide.descricao }}</span>
             </div>
-            <button class="icone-btn virar" aria-label="Próximo sabor" :disabled="produtos.length < 2" @click="ir(atual + 1)">
+            <button class="seta-slide virar" aria-label="Próximo sabor" :disabled="produtos.length < 2" @click="ir(atual + 1)">
               <IconeVoltar />
             </button>
           </div>
           <div v-if="temFotos" class="slide-textos abaixo" aria-live="polite">
             <h1 class="slide-nome">{{ slide.nome }}</h1>
-            <span v-if="slide.descricao" class="subtitulo">{{ slide.descricao }}</span>
+            <span v-if="slide.descricao" class="slide-desc">{{ slide.descricao }}</span>
           </div>
 
           <div class="slide-rodape">
@@ -132,11 +129,15 @@ watch(produtos, (lista) => {
               <span class="estoque">{{ slide.disponivel ? `restam ${slide.disponivel}` : 'acabou por hoje' }}</span>
             </div>
             <div v-if="slide.disponivel" class="stepper">
-              <button :aria-label="`Tirar ${slide.nome} da reserva`" :disabled="!q(slide.id)" @click="somar(slide, -1)">−</button>
+              <button class="menos" :aria-label="`Tirar ${slide.nome} da reserva`" :disabled="!q(slide.id)" @click="somar(slide, -1)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12h14" /></svg>
+              </button>
               <span aria-live="polite">{{ q(slide.id) }}</span>
-              <button :aria-label="`Adicionar ${slide.nome} à reserva`" :disabled="q(slide.id) >= slide.disponivel" @click="somar(slide, 1)">+</button>
+              <button class="mais" :aria-label="`Adicionar ${slide.nome} à reserva`" :disabled="q(slide.id) >= slide.disponivel" @click="somar(slide, 1)">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              </button>
             </div>
-            <span v-else class="esgotado">ESGOTADO</span>
+            <span v-else class="esgotado">Esgotado hoje</span>
           </div>
 
           <div class="pontos">
@@ -151,19 +152,35 @@ watch(produtos, (lista) => {
             </button>
           </div>
         </template>
-        <p v-else class="subtitulo vazio">Nenhum sabor cadastrado.</p>
+        <p v-else class="vazio">Nenhum sabor cadastrado.</p>
       </section>
 
-      <section v-if="loc" class="secao">
-        <p class="onde">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="stroke: var(--destaque-texto)" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>
-          Localização atualizada {{ haQuantoTempo(loc.atualizado_em) }}
-        </p>
+      <div v-if="contagem" class="bloco bloco-preto resumo">
+        <div class="resumo-topo">
+          <span class="resumo-rotulo">Sua reserva</span>
+          <span class="pilula">Rascunho</span>
+        </div>
+        <span class="resumo-total">{{ contagem }} {{ contagem === 1 ? 'item' : 'itens' }} · {{ formatarBRL(total) }}</span>
+        <div class="unidades" aria-hidden="true">
+          <template v-for="p in produtos" :key="p.id">
+            <span v-for="n in q(p.id)" :key="n" :style="{ background: corDoProduto(p) }" />
+          </template>
+        </div>
+      </div>
+
+      <section v-if="loc" class="bloco">
+        <div class="parada">
+          <span class="icone-parada"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg></span>
+          <span class="parada-textos">
+            <span class="parada-nome">Onde está agora</span>
+            <span class="dica">atualizado {{ haQuantoTempo(loc.atualizado_em) }}</span>
+          </span>
+        </div>
         <MiniMapa :latitude="loc.latitude" :longitude="loc.longitude" :foto="v.foto_url" />
       </section>
 
       <section v-if="produtos.length" class="secao">
-        <h2 class="titulo-grande menor">Sabores</h2>
+        <h2 class="titulo-secao">Sabores</h2>
         <div class="cards">
           <button
             v-for="(p, k) in produtos"
@@ -173,107 +190,146 @@ watch(produtos, (lista) => {
             :aria-label="`Ver ${p.nome}`"
             @click="verSabor(k)"
           >
-            <span class="amostra" :style="{ background: corDoProduto(p) }" />
+            <span class="card-topo">
+              <span class="card-seta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
+              <span class="amostra" :style="{ background: corDoProduto(p) }" />
+            </span>
             <span class="card-nome">{{ p.nome }}</span>
             <span class="card-preco">{{ formatarBRL(p.preco) }}</span>
-            <span class="card-estoque">{{ !p.disponivel ? 'ESGOTADO' : q(p.id) ? `${q(p.id)} NA RESERVA` : `RESTAM ${p.disponivel}` }}</span>
+            <span class="card-estoque">{{ !p.disponivel ? 'Esgotado' : q(p.id) ? `${q(p.id)} na reserva` : `restam ${p.disponivel}` }}</span>
           </button>
         </div>
       </section>
     </template>
 
-    <section v-if="v.status !== 'fora_de_atividade' && v.paradas.length" class="secao">
+    <section v-if="v.status !== 'fora_de_atividade' && v.paradas.length" class="bloco">
       <h2 class="rotulo-secao">Próximas paradas</h2>
       <div v-for="p in v.paradas" :key="p.id" class="parada">
-        <span class="parada-nome">{{ p.local }}</span>
-        <span class="dica">{{ quandoParada(p) }}</span>
+        <span class="icone-parada"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg></span>
+        <span class="parada-textos"><span class="parada-nome">{{ p.local }}</span><span class="dica">{{ quandoParada(p) }}</span></span>
       </div>
     </section>
 
-    <section v-if="v.descricao && v.status !== 'fora_de_atividade'" class="secao">
+    <section v-if="v.descricao && v.status !== 'fora_de_atividade'" class="bloco">
       <h2 class="rotulo-secao">Sobre</h2>
       <p class="sobre">{{ v.descricao }}</p>
     </section>
 
-    <p class="secao dica">
-      <NuxtLink to="/pedidos">Meus pedidos</NuxtLink>
-    </p>
+    <NuxtLink to="/pedidos" class="bloco link-pedidos">
+      <span class="parada-nome">Meus pedidos</span>
+      <span class="seta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
+    </NuxtLink>
 
-    <div v-if="v.status !== 'fora_de_atividade'" class="barra-fixa">
+    <div v-if="v.status !== 'fora_de_atividade'" class="cta">
       <NuxtLink
         :to="contagem ? `/v/${slug}/reservar` : ''"
-        class="btn btn-destaque btn-bloco reservar"
+        class="reservar"
         :class="{ off: !contagem }"
         :aria-disabled="!contagem"
       >
-        <span>Reservar · {{ contagem }} {{ contagem === 1 ? 'item' : 'itens' }}</span>
+        <span class="reservar-texto">Reservar · {{ contagem }} {{ contagem === 1 ? 'item' : 'itens' }}</span>
         <span>{{ formatarBRL(total) }}</span>
+        <span class="reservar-seta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
       </NuxtLink>
     </div>
   </main>
-  <main v-else class="pagina falha">
+  <main v-else class="pagina-bloco falha">
     <p class="erro" role="alert">Não foi possível carregar o vendedor agora.</p>
     <button class="btn btn-cinza" @click="refresh()">Tentar de novo</button>
   </main>
 </template>
 
 <style scoped>
-.pagina { min-height: 100dvh; display: flex; flex-direction: column; max-width: 640px; margin: 0 auto; }
-.slide { color: #FFFFFF; min-height: 72dvh; display: flex; flex-direction: column; transition: background .3s; }
+
+/* Carrossel: bloco inteiro na cor do sabor. */
+.slide { color: #FFFFFF; min-height: 72dvh; border-radius: var(--raio-card); padding: 0 16px 8px; display: flex; flex-direction: column; gap: 18px; transition: background .3s; }
+.slide-topo { height: 64px; display: flex; align-items: center; gap: 10px; margin-right: -10px; }
+.voltar { width: 40px; height: 40px; border-radius: 50%; background: rgba(0, 0, 0, .22); color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.topo-textos { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.topo-nome { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topo-status { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+.ponto { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.carrinho { width: 52px; height: 52px; border-radius: 50%; background: #FFFFFF; color: #111111; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
 .badge {
-  position: absolute; top: 4px; right: 2px; background: #FFFFFF; color: #0A0A0A; font-size: 11px; font-weight: 900;
-  border-radius: 9px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+  position: absolute; top: -2px; right: -2px; background: var(--destaque); color: var(--sobre-destaque); font-size: 11px; font-weight: 700;
+  border-radius: 10px; min-width: 20px; height: 20px; padding: 0 4px; display: flex; align-items: center; justify-content: center;
 }
-.status { margin: 4px 24px 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; }
-.ponto { width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
-.slide-meio { flex: 1; display: flex; align-items: center; gap: 4px; padding: 24px 4px; }
-.slide-meio .icone-btn:disabled { opacity: .3; }
-.slide-meio.com-foto { flex: 0 0 auto; justify-content: space-between; padding: 16px 4px 8px; }
-.bolinha-foto { width: min(230px, 58vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: rgba(0, 0, 0, .18); }
-.bolinha-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.slide-textos.abaixo { flex: 1; padding: 8px 24px 20px; }
+.slide-meio { flex: 1; display: flex; align-items: center; gap: 4px; }
+.slide-meio.com-foto { flex: 0 0 auto; justify-content: space-between; }
+.seta-slide { width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .18); color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.seta-slide:disabled { opacity: .3; }
 .virar { transform: scaleX(-1); }
-.slide-textos { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.slide-nome { margin: 0; font-size: clamp(40px, 13vw, 64px); font-weight: 900; line-height: .95; text-transform: uppercase; overflow-wrap: anywhere; }
-.slide-rodape { padding: 0 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
-.slide-preco { display: flex; flex-direction: column; gap: 4px; }
-.preco { font-size: 30px; }
-.estoque { font-size: 14px; font-weight: 500; }
-.stepper { display: flex; align-items: center; gap: 8px; }
-.stepper button {
-  width: 56px; height: 56px; border-radius: 18px; border: 0; background: rgba(255, 255, 255, .18); color: inherit; font-size: 28px; font-weight: 900;
-}
+.bolinha-foto { width: min(220px, 56vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: rgba(0, 0, 0, .18); }
+.bolinha-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slide-textos { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.slide-textos.abaixo { flex: 1; }
+.slide-nome { margin: 0; font-size: clamp(36px, 11vw, 56px); font-weight: 600; line-height: 1; letter-spacing: -1.5px; overflow-wrap: anywhere; }
+.slide-desc { font-size: 16px; line-height: 1.3; opacity: .88; }
+.slide-rodape { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.slide-preco { display: flex; flex-direction: column; gap: 2px; }
+.preco { font-size: 30px; font-weight: 600; letter-spacing: -0.5px; }
+.estoque { font-size: 13px; font-weight: 500; opacity: .88; }
+.stepper { background: rgba(0, 0, 0, .22); border-radius: var(--pilula); padding: 6px; display: flex; align-items: center; gap: 4px; }
+.stepper button { width: 48px; height: 48px; border: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.stepper .menos { background: rgba(255, 255, 255, .18); color: #FFFFFF; }
+.stepper .mais { background: #FFFFFF; color: #111111; }
 .stepper button:disabled { opacity: .4; }
-.stepper span { min-width: 32px; text-align: center; font-size: 26px; font-weight: 900; }
-.esgotado { background: rgba(0, 0, 0, .25); border-radius: 999px; padding: 10px 16px; font-weight: 900; letter-spacing: 1.5px; font-size: 13px; }
-.pontos { display: flex; justify-content: center; gap: 4px; padding: 20px 0; }
+.stepper span { min-width: 30px; text-align: center; font-size: 22px; font-weight: 600; }
+.esgotado { background: rgba(0, 0, 0, .3); border-radius: var(--pilula); padding: 10px 16px; font-weight: 600; font-size: 13px; }
+.pontos { display: flex; justify-content: center; gap: 2px; }
 .pontos button { width: 32px; height: 32px; border: 0; background: none; color: inherit; display: flex; align-items: center; justify-content: center; }
-.pontos span { width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
-.pontos span.atual { width: 18px; height: 18px; border-radius: 9px; border: 2px solid currentColor; background: radial-gradient(currentColor 3px, transparent 4px); }
-.vazio { padding: 24px; }
-.secao { padding: 32px 16px 0; display: flex; flex-direction: column; gap: 12px; margin: 0; }
-.menor { font-size: 34px; }
-.onde { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--texto-2); font-size: 15px; }
-.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pontos span { width: 8px; height: 8px; border-radius: 4px; background: currentColor; opacity: .5; }
+.pontos span.atual { width: 22px; opacity: 1; }
+.vazio { padding: 24px 0; font-size: 16px; }
+
+/* Resumo preto da reserva. */
+.resumo { gap: 14px; padding: 18px 18px 20px; }
+.resumo-topo { display: flex; justify-content: space-between; align-items: center; }
+.resumo-rotulo { font-size: 13px; color: #A6A6A6; }
+.resumo-topo .pilula { align-self: auto; }
+.resumo-total { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
+.unidades { display: flex; gap: 4px; }
+.unidades span { flex: 1; height: 6px; border-radius: 3px; }
+
+.parada { display: flex; align-items: center; gap: 12px; }
+.icone-parada { width: 44px; height: 44px; border-radius: 50%; background: var(--fundo); color: var(--destaque-texto); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.parada-textos { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.parada-nome { font-size: 17px; font-weight: 600; }
+
+.secao { display: flex; flex-direction: column; gap: 8px; }
+.titulo-secao { margin: 8px 8px 4px; font-size: 26px; font-weight: 600; letter-spacing: -0.5px; }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .card {
-  min-height: 200px; padding: 12px; background: var(--card); border-radius: var(--raio-card); border: 2px solid transparent;
-  display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;
+  min-height: 172px; padding: 14px; background: var(--card); border-radius: var(--raio-card); border: 2px solid transparent;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left;
 }
-.card.selecionado { border-color: var(--destaque-texto); }
+.card.selecionado { border-color: var(--texto); }
 .card.fora { opacity: .55; }
-.amostra { width: 100%; height: 90px; border-radius: 12px; margin-bottom: 4px; }
-.card-nome { font-size: 18px; font-weight: 900; line-height: 1.05; text-transform: uppercase; }
-.card-preco { font-size: 14px; font-style: italic; color: var(--texto-2); }
-.card-estoque { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--texto-3); }
-.parada { display: flex; flex-direction: column; gap: 2px; }
-.parada-nome { font-weight: 700; }
+.card-topo { display: flex; justify-content: space-between; width: 100%; }
+.card-seta { width: 40px; height: 40px; border-radius: 50%; background: var(--fundo); display: flex; align-items: center; justify-content: center; }
+.amostra { width: 40px; height: 40px; border-radius: 50%; }
+.card-nome { margin-top: auto; font-size: 17px; font-weight: 600; line-height: 1.15; }
+.card-preco { font-size: 14px; color: var(--texto-2); }
+.card-estoque { font-size: 12px; font-weight: 600; color: var(--texto-3); }
+
 .sobre { margin: 0; line-height: 1.5; color: var(--texto-2); }
-.ops { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 48px 24px; }
-.ops .titulo-grande { font-size: 52px; }
-.parada-grande { background: var(--card); border-radius: var(--raio-card); padding: 20px; display: flex; flex-direction: column; gap: 6px; }
-.parada-local { font-weight: 900; font-size: 28px; text-transform: uppercase; line-height: 1; }
-.barra-fixa { margin-top: auto; }
-.reservar { justify-content: space-between; }
+.link-pedidos { flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 10px 10px 18px; text-decoration: none; }
+
+.ops-sub { font-size: 16px; line-height: 1.4; color: var(--texto-2); }
+.proxima { gap: 10px; }
+.rot-claro { margin: 0; font-size: 13px; font-weight: 500; color: #A6A6A6; }
+.proxima-local { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.1; }
+.proxima-quando { font-size: 15px; color: #D6D6D6; }
+.outros { order: 99; margin-top: auto; }
+
+/* Botão flutuante de reservar. */
+.cta { position: sticky; bottom: 0; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
+.reservar {
+  height: 64px; border-radius: var(--pilula); background: var(--destaque); color: var(--sobre-destaque); text-decoration: none;
+  display: flex; align-items: center; gap: 12px; padding: 0 8px 0 24px; font-weight: 600; font-size: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+.reservar-texto { flex: 1; }
+.reservar-seta { width: 48px; height: 48px; border-radius: 50%; background: #111111; color: var(--destaque); display: flex; align-items: center; justify-content: center; }
 .off { pointer-events: none; opacity: .45; }
 .falha { padding: 48px 16px; gap: 16px; }
 </style>

@@ -19,11 +19,11 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&family=Roboto:wght@300;400;500;700;900&display=swap' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap' },
       ],
-      // Aplica o tema escuro antes da primeira pintura (sem piscar claro). Ver composables/useTema.ts.
+      // Aplica o tema escuro e a cor do app antes da primeira pintura (sem piscar). Ver composables/useTema.ts.
       script: [{
-        innerHTML: `try{var t=localStorage.getItem('tema');if(t==='escuro'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.tema='escuro'}catch(e){}`,
+        innerHTML: `try{var d=document.documentElement,t=localStorage.getItem('tema'),c=localStorage.getItem('cor');if(t==='escuro'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))d.dataset.tema='escuro';if(c==='laranja'||c==='verde'||c==='azul')d.dataset.cor=c}catch(e){}`,
         tagPosition: 'head',
       }],
     },
@@ -40,6 +40,7 @@ export default defineNuxtConfig({
     // Área logada do cliente também só no navegador (D38).
     '/pedidos': { ssr: false },
     '/pedidos/**': { ssr: false },
+    '/perfil': { ssr: false },
     '/entrar': { ssr: false },
     '/cadastro': { ssr: false },
     '/v/*/reservar': { ssr: false },

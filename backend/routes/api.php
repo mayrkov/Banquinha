@@ -3,7 +3,9 @@
 use App\Http\Controllers\Api\V1\AuthVendedorController;
 use App\Http\Controllers\Api\V1\Cliente\AuthClienteController;
 use App\Http\Controllers\Api\V1\Cliente\ReservaClienteController;
+use App\Http\Controllers\Api\V1\FechamentoController;
 use App\Http\Controllers\Api\V1\LoginController;
+use App\Http\Controllers\Api\V1\MetricaController;
 use App\Http\Controllers\Api\V1\ParadaController;
 use App\Http\Controllers\Api\V1\ProdutoController;
 use App\Http\Controllers\Api\V1\Publico\VendedorPublicoController;
@@ -28,6 +30,9 @@ Route::prefix('v1/vendedor')->group(function () {
         Route::post('produtos/{produto}/foto', [ProdutoController::class, 'foto']);
         Route::delete('produtos/{produto}/foto', [ProdutoController::class, 'removerFoto']);
         Route::post('vendas', [VendaController::class, 'store']);
+        Route::get('metricas', MetricaController::class);
+        Route::get('fechamento', [FechamentoController::class, 'show']);
+        Route::post('fechamento', [FechamentoController::class, 'store']);
 
         Route::post('turno/iniciar', [TurnoController::class, 'iniciar']);
         Route::post('turno/encerrar', [TurnoController::class, 'encerrar']);

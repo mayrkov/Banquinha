@@ -89,16 +89,16 @@ async function deslogar() {
 
 <template>
   <section class="tela">
-    <header class="cab"><h1 class="titulo">Conta</h1></header>
+    <header class="bloco"><h1 class="titulo-pagina">Conta</h1></header>
 
-    <section class="foto" aria-labelledby="titulo-foto">
-      <h2 id="titulo-foto" class="sub">Foto do perfil</h2>
+    <section class="bloco foto" aria-labelledby="titulo-foto">
+      <h2 id="titulo-foto" class="bloco-titulo">Foto do perfil</h2>
       <div class="foto-linha">
         <div class="bolinha">
           <img v-if="vendedor?.foto_url" :src="vendedor.foto_url" alt="" width="96" height="96">
         </div>
         <div class="foto-acoes">
-          <label class="btn btn-cinza" :class="{ desligado: enviandoFoto || !online }">
+          <label class="btn btn-cinza-claro" :class="{ desligado: enviandoFoto || !online }">
             {{ enviandoFoto ? 'Enviando…' : vendedor?.foto_url ? 'Trocar foto' : 'Escolher foto' }}
             <input type="file" accept="image/jpeg,image/png,image/webp" class="sr" :disabled="enviandoFoto || !online" @change="escolherFoto">
           </label>
@@ -110,6 +110,8 @@ async function deslogar() {
     </section>
 
     <form class="form" @submit.prevent="enviar">
+      <div class="bloco">
+      <h2 class="bloco-titulo">Dados</h2>
       <label class="campo">Nome
         <input v-model="form.nome" required maxlength="255">
       </label>
@@ -117,7 +119,9 @@ async function deslogar() {
         <input v-model="form.telefone" type="tel" maxlength="30">
       </label>
 
-      <h2 class="sub">Página pública</h2>
+      </div>
+      <div class="bloco">
+      <h2 class="bloco-titulo">Página pública</h2>
       <label class="campo">Endereço da página
         <input v-model="form.slug" maxlength="60" autocapitalize="off" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="pao-de-queijo-do-joao">
         <small>Só letras minúsculas, números e hífen. Link: {{ form.slug ? `/v/${form.slug}` : '—' }}</small>
@@ -126,7 +130,9 @@ async function deslogar() {
         <textarea v-model="form.descricao" maxlength="2000" placeholder="O que você vende, onde costuma estar…" />
       </label>
 
-      <h2 class="sub">Reservas</h2>
+      </div>
+      <div class="bloco">
+      <h2 class="bloco-titulo">Reservas</h2>
       <div class="dois">
         <label class="campo">Taxa de entrega (R$)
           <input v-model="form.taxa_entrega" inputmode="decimal">
@@ -136,7 +142,9 @@ async function deslogar() {
         </label>
       </div>
 
-      <h2 class="sub">Pix</h2>
+      </div>
+      <div class="bloco">
+      <h2 class="bloco-titulo">Pix</h2>
       <label class="campo">Chave Pix
         <input v-model="form.chave_pix" maxlength="77" autocapitalize="off">
         <small>Celular com +55, e-mail, CPF/CNPJ ou chave aleatória.</small>
@@ -150,7 +158,9 @@ async function deslogar() {
         </label>
       </div>
 
-      <h2 class="sub">Cartão</h2>
+      </div>
+      <div class="bloco">
+      <h2 class="bloco-titulo">Cartão</h2>
       <label class="campo">Como você cobra no cartão?
         <select v-model="form.provedor_cartao">
           <option value="">Não aceito cartão / não informado</option>
@@ -159,17 +169,25 @@ async function deslogar() {
           <option value="outro">Outra maquininha</option>
         </select>
       </label>
+      </div>
 
-      <p v-if="erro" class="erro" role="alert">{{ erro }}</p>
-      <p v-if="ok" class="dica" role="status">Salvo.</p>
-      <button class="btn btn-destaque" :disabled="salvando || !online">{{ salvando ? 'Salvando…' : 'Salvar' }}</button>
+      <p v-if="erro" class="erro nota" role="alert">{{ erro }}</p>
+      <p v-if="ok" class="dica nota" role="status">Salvo.</p>
+      <button class="btn btn-destaque btn-seta" :disabled="salvando || !online">
+        {{ salvando ? 'Salvando…' : 'Salvar' }}
+        <span class="bolinha-seta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg></span>
+      </button>
     </form>
 
-    <h2 class="sub aparencia">Aparência</h2>
-    <label class="tema">
-      <input type="checkbox" :checked="escuro" @change="alternarTema">
-      Modo escuro
-    </label>
+    <section class="bloco">
+      <h2 class="bloco-titulo">Aparência</h2>
+      <span class="dica">Cor do app: muda a cor de destaque em todas as telas deste aparelho.</span>
+      <SeletorCor />
+      <label class="linha-bloco tema">
+        <input type="checkbox" :checked="escuro" @change="alternarTema">
+        Modo escuro
+      </label>
+    </section>
 
     <div class="sair">
       <p v-if="fila.length" class="dica">Há {{ fila.length }} venda(s) ainda não enviadas. Conecte-se antes de sair.</p>
@@ -179,22 +197,22 @@ async function deslogar() {
 </template>
 
 <style scoped>
-.tela { padding: 0 16px 24px; }
-.cab { height: 64px; display: flex; align-items: center; }
-.form { display: flex; flex-direction: column; gap: 16px; }
-.sub { margin: 8px 0 0; font-size: 13px; font-weight: 900; letter-spacing: 2px; color: var(--texto-3); text-transform: uppercase; }
-.foto { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-.foto .sub { margin: 0; }
+.tela { display: flex; flex-direction: column; gap: 8px; }
+.titulo-pagina { margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -1px; line-height: 1.05; }
+.form { display: flex; flex-direction: column; gap: 8px; }
+.nota { padding: 0 8px; }
+.btn-seta .bolinha-seta { width: 48px; height: 48px; border-radius: 50%; background: #111111; color: var(--destaque); display: flex; align-items: center; justify-content: center; }
 .foto-linha { display: flex; align-items: center; gap: 16px; }
 .bolinha { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--cinza); }
 .bolinha img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .foto-acoes { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.foto-acoes .btn { min-height: 48px; font-size: 13px; }
+.foto-acoes .btn { min-height: 48px; font-size: 14px; }
 .foto-acoes label:focus-within { outline: 3px solid var(--destaque-texto); outline-offset: 2px; }
+.btn-cinza-claro { background: var(--fundo); color: var(--texto); }
 .desligado { opacity: .45; cursor: not-allowed; }
 .dois { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.aparencia { margin-top: 32px; }
-.tema { margin-top: 12px; min-height: 48px; display: flex; align-items: center; gap: 12px; font-weight: 700; }
+.tema { min-height: 56px; padding: 0 18px; font-weight: 600; cursor: pointer; }
 .tema input { width: 24px; height: 24px; accent-color: var(--destaque); }
-.sair { margin-top: 32px; display: flex; flex-direction: column; gap: 8px; }
+.sair { display: flex; flex-direction: column; gap: 8px; }
+.sair .dica { padding: 0 8px; }
 </style>

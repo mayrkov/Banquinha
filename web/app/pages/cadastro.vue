@@ -24,17 +24,11 @@ async function enviar() {
 </script>
 
 <template>
-  <main class="pagina">
-    <header class="topo-cliente">
-      <button class="icone-btn" aria-label="Voltar" @click="$router.back()"><IconeVoltar /></button>
-      <span class="marca">Banquinha</span>
-      <span class="icone-btn" />
-    </header>
-    <div class="cab">
-      <h1 class="titulo-grande">Criar conta</h1>
-      <span class="subtitulo">Para reservar e acompanhar pedidos</span>
-    </div>
-    <form class="form" @submit.prevent="enviar">
+  <main class="pagina-bloco">
+    <TopoBloco marca="Banquinha" titulo="Criar conta">
+      <span class="sub">para reservar e acompanhar pedidos</span>
+    </TopoBloco>
+    <form class="bloco form" @submit.prevent="enviar">
       <label class="campo">Nome
         <input v-model="form.nome" autocomplete="name" required maxlength="255">
       </label>
@@ -50,7 +44,10 @@ async function enviar() {
         <small>Mínimo de 8 caracteres.</small>
       </label>
       <p v-if="erro" class="erro" role="alert">{{ erro }}</p>
-      <button class="btn btn-destaque" :disabled="carregando">{{ carregando ? 'Criando…' : 'Criar conta' }}</button>
+      <button class="btn btn-escuro btn-seta" :disabled="carregando">
+        {{ carregando ? 'Criando…' : 'Criar conta' }}
+        <span class="bolinha"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
+      </button>
       <p class="dica">Pedimos nome, e-mail, telefone e senha. O endereço de entrega é apagado 3 dias após o pedido terminar.</p>
     </form>
     <p class="rodape dica">Já tem conta? <NuxtLink :to="{ path: '/entrar', query: { volta } }">Entrar</NuxtLink></p>
@@ -58,8 +55,8 @@ async function enviar() {
 </template>
 
 <style scoped>
-.pagina { min-height: 100dvh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
-.cab { padding: 24px 24px 0; display: flex; flex-direction: column; gap: 6px; }
-.form { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-.rodape { padding: 0 24px 32px; }
+.pagina-bloco { max-width: 480px; }
+.sub { font-size: 16px; line-height: 1.3; }
+.form { gap: 14px; }
+.rodape { padding: 8px 8px 24px; }
 </style>

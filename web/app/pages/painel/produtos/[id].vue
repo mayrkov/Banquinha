@@ -72,21 +72,16 @@ onMounted(async () => {
 
 <template>
   <section class="tela">
-    <header class="cab">
-      <NuxtLink to="/painel/produtos" class="voltar" aria-label="Voltar para produtos">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-      </NuxtLink>
-      <h1 class="titulo">{{ novo ? 'Novo produto' : 'Editar produto' }}</h1>
-    </header>
+    <TopoBloco escuro voltar="/painel/produtos" rotulo-voltar="Voltar para produtos" marca="Produtos" :titulo="novo ? 'Novo produto' : 'Editar produto'" />
 
-    <section class="foto" aria-labelledby="titulo-foto">
-      <h2 id="titulo-foto" class="campo-rotulo">Foto do sabor</h2>
+    <section class="bloco foto" aria-labelledby="titulo-foto">
+      <h2 id="titulo-foto" class="bloco-titulo">Foto do sabor</h2>
       <div class="foto-linha">
         <div class="bolinha" :style="{ background: form.cor }">
           <img v-if="foto" :src="foto" alt="" width="112" height="112">
         </div>
         <div v-if="!novo" class="foto-acoes">
-          <label class="btn btn-cinza" :class="{ desligado: enviandoFoto || !online }">
+          <label class="btn btn-cinza-claro" :class="{ desligado: enviandoFoto || !online }">
             {{ enviandoFoto ? 'Enviando…' : foto ? 'Trocar foto' : 'Escolher foto' }}
             <input type="file" accept="image/jpeg,image/png,image/webp" class="sr" :disabled="enviandoFoto || !online" @change="escolherFoto">
           </label>
@@ -97,7 +92,7 @@ onMounted(async () => {
       <p v-if="erroFoto" class="erro" role="alert">{{ erroFoto }}</p>
     </section>
 
-    <form class="form" @submit.prevent="enviar">
+    <form class="bloco" @submit.prevent="enviar">
       <label class="campo">Nome
         <input v-model="form.nome" required maxlength="255" placeholder="Ex.: Nutella">
       </label>
@@ -116,32 +111,32 @@ onMounted(async () => {
           <small>Quantidade de agora</small>
         </label>
       </div>
-      <label class="check">
+      <label class="linha-bloco check">
         <input v-model="form.ativo" type="checkbox"> Ativo (aparece no cardápio e no PDV)
       </label>
       <p v-if="erro" class="erro" role="alert">{{ erro }}</p>
       <p v-if="!online" class="dica">Sem internet: salvar precisa de sinal.</p>
-      <button class="btn btn-destaque" :disabled="salvando || !online">{{ salvando ? 'Salvando…' : 'Salvar' }}</button>
+      <button class="btn btn-destaque btn-seta" :disabled="salvando || !online">
+        {{ salvando ? 'Salvando…' : 'Salvar' }}
+        <span class="bolinha-seta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg></span>
+      </button>
     </form>
   </section>
 </template>
 
 <style scoped>
-.tela { padding: 0 16px 24px; }
-.cab { height: 64px; display: flex; align-items: center; gap: 8px; }
-.voltar { width: 44px; height: 44px; margin-left: -10px; color: var(--texto); display: flex; align-items: center; justify-content: center; }
-.form { display: flex; flex-direction: column; gap: 16px; }
+.tela { display: flex; flex-direction: column; gap: 8px; }
 .dois { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .cor input { width: 88px; padding: 4px; }
-.foto { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.campo-rotulo { margin: 0; font-size: 14px; font-weight: 700; }
 .foto-linha { display: flex; align-items: center; gap: 16px; }
 .bolinha { width: 112px; height: 112px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
 .bolinha img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .foto-acoes { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.foto-acoes .btn { min-height: 48px; font-size: 13px; }
+.foto-acoes .btn { min-height: 48px; font-size: 14px; }
 .foto-acoes label:focus-within { outline: 3px solid var(--destaque-texto); outline-offset: 2px; }
+.btn-cinza-claro { background: var(--fundo); color: var(--texto); }
 .desligado { opacity: .45; cursor: not-allowed; }
-.check { display: flex; align-items: center; gap: 10px; font-size: 14px; min-height: 44px; }
+.check { min-height: 56px; padding: 0 18px; font-size: 14px; cursor: pointer; }
 .check input { width: 22px; height: 22px; accent-color: var(--destaque-texto); }
+.btn-seta .bolinha-seta { width: 48px; height: 48px; border-radius: 50%; background: #111111; color: var(--destaque); display: flex; align-items: center; justify-content: center; }
 </style>

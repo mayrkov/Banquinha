@@ -44,64 +44,63 @@ onBeforeUnmount(() => clearInterval(relogio))
 
 <template>
   <section class="tela">
-    <header class="cab">
-      <h1 class="titulo">Reservas</h1>
-      <button class="btn btn-linha" @click="carregar">Atualizar</button>
+    <header class="bloco cab">
+      <h1 class="titulo-pagina">Reservas</h1>
+      <button class="btn btn-cinza-claro" @click="carregar">Atualizar</button>
     </header>
-    <p v-if="erro" class="erro" role="alert">{{ erro }}</p>
-    <p v-if="carregou && !reservas.length" class="dica">Nenhuma reserva por enquanto.</p>
+    <p v-if="erro" class="erro bloco" role="alert">{{ erro }}</p>
+    <p v-if="carregou && !reservas.length" class="bloco dica">Nenhuma reserva por enquanto.</p>
 
     <template v-if="pendentes.length">
-      <h2 class="rotulo-secao">Novas · responda no prazo</h2>
       <article v-for="r in pendentes" :key="r.codigo" class="card novo">
-        <div class="topo-card"><strong>{{ r.cliente?.nome }}</strong><strong>{{ formatarBRL(r.valor_total) }}</strong></div>
+        <div class="topo-card"><span class="rot">Nova reserva</span><span class="pilula preta">responda em {{ minutos(r.responder_ate) }} min</span></div>
+        <div class="topo-card"><strong class="nome">{{ r.cliente?.nome }}</strong><strong class="valor">{{ formatarBRL(r.valor_total) }}</strong></div>
         <span>{{ resumoItens(r) }}</span>
-        <span class="dica">{{ ondeEntregar(r) }}</span>
-        <span class="prazo">Responder em {{ minutos(r.responder_ate) }} min</span>
+        <span class="info">{{ ondeEntregar(r) }}</span>
         <div class="duas">
-          <button class="btn btn-contorno" :disabled="ocupado === r.codigo" @click="fazer(r, 'negar', 'Negar esta reserva?')">Negar</button>
-          <button class="btn btn-destaque" :disabled="ocupado === r.codigo" @click="fazer(r, 'aceitar')">Aceitar</button>
+          <button class="btn btn-branco" :disabled="ocupado === r.codigo" @click="fazer(r, 'negar', 'Negar esta reserva?')">Negar</button>
+          <button class="btn btn-escuro" :disabled="ocupado === r.codigo" @click="fazer(r, 'aceitar')">Aceitar</button>
         </div>
       </article>
     </template>
 
     <template v-if="pagou.length">
-      <h2 class="rotulo-secao">Cliente disse "já paguei"</h2>
-      <article v-for="r in pagou" :key="r.codigo" class="card">
-        <div class="topo-card"><strong>{{ r.cliente?.nome }}</strong><strong>{{ formatarBRL(r.valor_total) }}</strong></div>
+      <article v-for="r in pagou" :key="r.codigo" class="card bloco-preto">
+        <span class="rot">Cliente disse "já paguei"</span>
+        <div class="topo-card"><strong class="nome">{{ r.cliente?.nome }}</strong><strong class="valor destaque">{{ formatarBRL(r.valor_total) }}</strong></div>
         <span>{{ resumoItens(r) }}</span>
-        <span class="dica">{{ ondeEntregar(r) }}</span>
-        <p class="dica">Confira no app do banco antes de confirmar.</p>
-        <button class="btn btn-escuro" :disabled="ocupado === r.codigo" @click="fazer(r, 'confirmar-pagamento', `Confirmar que recebeu ${formatarBRL(r.valor_total)} no Pix?`)">Confirmar pagamento</button>
+        <span class="info">{{ ondeEntregar(r) }}</span>
+        <p class="info">Confira no app do banco antes de confirmar.</p>
+        <button class="btn btn-destaque" :disabled="ocupado === r.codigo" @click="fazer(r, 'confirmar-pagamento', `Confirmar que recebeu ${formatarBRL(r.valor_total)} no Pix?`)">Confirmar pagamento</button>
       </article>
     </template>
 
     <template v-if="aguardando.length">
-      <h2 class="rotulo-secao">Aceitas · aguardando Pix</h2>
       <article v-for="r in aguardando" :key="r.codigo" class="card">
-        <div class="topo-card"><strong>{{ r.cliente?.nome }}</strong><strong>{{ formatarBRL(r.valor_total) }}</strong></div>
+        <span class="pilula cinza">Aceita · aguardando Pix</span>
+        <div class="topo-card"><strong class="nome">{{ r.cliente?.nome }}</strong><strong class="valor">{{ formatarBRL(r.valor_total) }}</strong></div>
         <span>{{ resumoItens(r) }}</span>
-        <span class="dica">{{ ondeEntregar(r) }} · <a :href="`tel:${r.cliente?.telefone}`">{{ r.cliente?.telefone }}</a></span>
+        <span class="info">{{ ondeEntregar(r) }} · <a :href="`tel:${r.cliente?.telefone}`">{{ r.cliente?.telefone }}</a></span>
         <div class="duas">
-          <button class="btn btn-contorno" :disabled="ocupado === r.codigo" @click="fazer(r, 'cancelar', 'Cancelar e liberar as unidades?')">Cancelar</button>
+          <button class="btn btn-cinza-claro" :disabled="ocupado === r.codigo" @click="fazer(r, 'cancelar', 'Cancelar e liberar as unidades?')">Cancelar</button>
           <button class="btn btn-escuro" :disabled="ocupado === r.codigo" @click="fazer(r, 'confirmar-pagamento', `Confirmar que recebeu ${formatarBRL(r.valor_total)} no Pix?`)">Pagou</button>
         </div>
       </article>
     </template>
 
     <template v-if="entregar.length">
-      <h2 class="rotulo-secao">Pago · entregar</h2>
       <article v-for="r in entregar" :key="r.codigo" class="card">
-        <div class="topo-card"><strong>{{ r.cliente?.nome }}</strong><strong>{{ formatarBRL(r.valor_total) }}</strong></div>
+        <span class="pilula cinza">Pago · entregar</span>
+        <div class="topo-card"><strong class="nome">{{ r.cliente?.nome }}</strong><strong class="valor">{{ formatarBRL(r.valor_total) }}</strong></div>
         <span>{{ resumoItens(r) }}</span>
-        <span class="dica">{{ ondeEntregar(r) }} · <a :href="`tel:${r.cliente?.telefone}`">{{ r.cliente?.telefone }}</a></span>
+        <span class="info">{{ ondeEntregar(r) }} · <a :href="`tel:${r.cliente?.telefone}`">{{ r.cliente?.telefone }}</a></span>
         <label class="campo">Código de 4 dígitos dito pelo cliente
           <input v-model="codigos[r.codigo]" class="codigo" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">
         </label>
         <div class="duas">
-          <a v-if="r.tipo === 'entrega' && r.endereco_entrega" :href="mapa(r)" target="_blank" rel="noopener" class="btn btn-contorno">Abrir no mapa</a>
+          <a v-if="r.tipo === 'entrega' && r.endereco_entrega" :href="mapa(r)" target="_blank" rel="noopener" class="btn btn-cinza-claro">Abrir no mapa</a>
           <button
-            class="btn btn-destaque"
+            class="btn btn-escuro"
             :class="{ inteiro: r.tipo !== 'entrega' }"
             :disabled="ocupado === r.codigo || (codigos[r.codigo] ?? '').length !== 4"
             @click="fazer(r, 'entregar')"
@@ -113,27 +112,40 @@ onBeforeUnmount(() => clearInterval(relogio))
     </template>
 
     <template v-if="encerradas.length">
+      <div class="bloco bloco-contorno encerradas">
       <h2 class="rotulo-secao">Últimas 24h</h2>
       <div v-for="r in encerradas" :key="r.codigo" class="encerrada">
         <span>{{ r.cliente?.nome }} · {{ resumoItens(r) }}</span>
         <span class="dica">{{ ROTULO_STATUS[r.status].replace('por você', 'pelo cliente') }}</span>
       </div>
+      </div>
     </template>
-    <p v-if="!pendentes.length && reservas.length" class="dica">Avisos de reserva nova chegam aqui; mantenha o painel aberto durante o turno.</p>
+    <p v-if="!pendentes.length && reservas.length" class="dica aviso">Avisos de reserva nova chegam aqui; mantenha o painel aberto durante o turno.</p>
   </section>
 </template>
 
 <style scoped>
-.tela { padding: 0 16px 24px; display: flex; flex-direction: column; gap: 10px; }
-.cab { height: 64px; display: flex; align-items: center; justify-content: space-between; }
-.rotulo-secao { margin-top: 8px; font-size: 13px; }
-.card { background: var(--card); border-radius: var(--raio-card); padding: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
-.card.novo { border-top: 4px solid var(--destaque-texto); }
-.topo-card { display: flex; justify-content: space-between; gap: 8px; font-size: 17px; }
-.prazo { font-size: 13px; font-weight: 900; color: var(--destaque-texto); letter-spacing: 1px; text-transform: uppercase; }
-.duas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+.tela { display: flex; flex-direction: column; gap: 8px; }
+.cab { flex-direction: row; align-items: center; justify-content: space-between; }
+.titulo-pagina { margin: 0; font-size: 32px; font-weight: 600; letter-spacing: -1px; line-height: 1.05; }
+.btn-cinza-claro { min-height: 48px; background: var(--fundo); color: var(--texto); font-size: 14px; }
+.btn-branco { background: #FFFFFF; color: #111111; }
+.card { background: var(--card); color: var(--texto); border-radius: var(--raio-card); padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+.card.novo { background: var(--destaque); color: var(--sobre-destaque); }
+.topo-card { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.rot { font-size: 13px; font-weight: 600; }
+.bloco-preto .rot { color: #A6A6A6; font-weight: 500; }
+.pilula.preta { background: #111111; color: #FFFFFF; }
+.nome { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+.valor { font-size: 20px; font-weight: 600; white-space: nowrap; }
+.valor.destaque { font-size: 24px; color: var(--destaque); }
+.info { margin: 0; font-size: 14px; opacity: .8; }
+.duas { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 4px; }
+.duas .btn { min-height: 56px; }
 .inteiro { grid-column: 1 / -1; }
-.card .dica { font-size: 14px; }
-.codigo { text-align: center; font-size: 28px !important; font-weight: 900 !important; letter-spacing: 12px; background: var(--fundo) !important; }
+.codigo { text-align: center; min-height: 60px !important; font-size: 26px !important; font-weight: 600 !important; letter-spacing: 14px; background: var(--fundo) !important; }
+.encerradas { gap: 0; }
 .encerrada { display: flex; flex-direction: column; gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--linha); font-size: 14px; }
+.encerrada:last-child { border-bottom: 0; }
+.aviso { padding: 0 8px; }
 </style>

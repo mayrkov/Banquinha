@@ -58,6 +58,11 @@ class Vendedor extends Authenticatable
         return $this->hasMany(Venda::class);
     }
 
+    public function ajustesEstoque(): HasMany
+    {
+        return $this->hasMany(AjusteEstoque::class);
+    }
+
     public function turnos(): HasMany
     {
         return $this->hasMany(Turno::class);
