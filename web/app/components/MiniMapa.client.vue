@@ -40,7 +40,7 @@ onBeforeUnmount(() => mapa?.remove())
 </template>
 
 <style scoped>
-.mini-mapa { position: relative; height: 160px; border-radius: var(--raio); overflow: hidden; background: var(--card); }
+.mini-mapa { position: relative; isolation: isolate; /* botões do mapa não passam por cima do "Reservar" fixo */ height: 160px; border-radius: var(--raio); overflow: hidden; background: var(--card); }
 .abrir-mapa {
   position: absolute; right: 8px; top: 8px; z-index: 2; background: var(--preto); color: var(--sobre-preto);
   font-size: 13px; font-weight: 600; padding: 12px 16px; border-radius: var(--pilula); text-decoration: none;

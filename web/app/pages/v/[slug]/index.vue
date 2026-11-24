@@ -319,7 +319,7 @@ watch(produtos, (lista) => {
 .outros { order: 99; margin-top: auto; }
 
 /* Botão flutuante de reservar. */
-.cta { position: sticky; bottom: 0; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
+.cta { position: sticky; bottom: 0; z-index: 10; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
 .reservar {
   height: 64px; border-radius: var(--pilula); background: var(--destaque); color: var(--sobre-destaque); text-decoration: none;
   display: flex; align-items: center; gap: 12px; padding: 0 8px 0 24px; font-weight: 600; font-size: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
