@@ -18,6 +18,7 @@ onMounted(async () => {
     interactive: false,
     attributionControl: { compact: true },
   })
+  recolherCreditos(mapa)
   const ponto = Object.assign(document.createElement('span'), { className: props.foto ? 'ponto-vendedor com-foto' : 'ponto-vendedor' })
   if (props.foto) ponto.style.backgroundImage = `url("${props.foto}")`
   marcador = new lib.Marker({ element: ponto })
@@ -41,7 +42,7 @@ onBeforeUnmount(() => mapa?.remove())
 <style scoped>
 .mini-mapa { position: relative; height: 160px; border-radius: var(--raio); overflow: hidden; background: var(--card); }
 .abrir-mapa {
-  position: absolute; right: 8px; bottom: 8px; z-index: 2; background: var(--preto); color: var(--sobre-preto);
+  position: absolute; right: 8px; top: 8px; z-index: 2; background: var(--preto); color: var(--sobre-preto);
   font-size: 13px; font-weight: 600; padding: 12px 16px; border-radius: var(--pilula); text-decoration: none;
 }
 </style>

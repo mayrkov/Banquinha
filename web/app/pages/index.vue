@@ -156,7 +156,7 @@ onBeforeUnmount(() => clearInterval(timer))
 .outros button[aria-pressed="true"] { background: var(--destaque); color: var(--sobre-destaque); }
 .distancia { position: absolute; left: 10px; bottom: 14px; z-index: 2; background: #111111; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: var(--pilula); display: flex; align-items: center; gap: 6px; }
 .ponto { width: 7px; height: 7px; border-radius: 50%; background: var(--destaque); }
-.centralizar { position: absolute; right: 10px; bottom: 10px; z-index: 2; width: 48px; height: 48px; }
+.centralizar { position: absolute; right: 10px; bottom: 44px; /* acima do "i" dos créditos */ z-index: 2; width: 48px; height: 48px; }
 .rodape { flex: none; display: flex; flex-direction: column; gap: 8px; }
 .rodape > .erro, .vazio { padding: 0 12px; }
 .card { min-height: 112px; background: var(--card); color: var(--texto); border-radius: var(--raio-card); padding: 12px 12px 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; }

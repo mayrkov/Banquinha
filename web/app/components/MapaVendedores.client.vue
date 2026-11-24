@@ -95,6 +95,7 @@ onMounted(async () => {
     return
   }
   mapa.touchZoomRotate.disableRotation()
+  recolherCreditos(mapa)
   mapa.on('load', () => {
     desenhar()
     enquadrar()

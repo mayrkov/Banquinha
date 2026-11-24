@@ -7,3 +7,13 @@ export async function carregarMapLibre() {
   lib.setWorkerUrl(urlWorker)
   return lib
 }
+
+/**
+ * Créditos do mapa recolhidos no botão "i". O MapLibre abre o texto no celular e só fecha ao arrastar;
+ * no mapa fixo isso nunca acontece e o texto cobria os botões.
+ */
+export function recolherCreditos(mapa: import('maplibre-gl').Map) {
+  mapa.once('idle', () => {
+    mapa.getContainer().querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
+  })
+}
