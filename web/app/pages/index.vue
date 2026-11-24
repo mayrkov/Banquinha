@@ -38,7 +38,8 @@ const ordenados = computed(() => {
   }
   return lista
 })
-const ativo = computed(() => data.value.find(v => v.slug === selecionado.value) ?? ordenados.value[0] ?? null)
+// O card do vendedor só aparece depois de tocar nele (no mapa ou na lista).
+const ativo = computed(() => data.value.find(v => v.slug === selecionado.value) ?? null)
 
 const faixa = (v: VendedorMapa) => v.preco_min === null ? '' : v.preco_min === v.preco_max ? formatarBRL(v.preco_min) : `${formatarBRL(v.preco_min)} a ${formatarBRL(v.preco_max!)}`
 const vendendo = computed(() => data.value.filter(v => v.status === 'vendendo').length)
@@ -57,6 +58,11 @@ function centralizarEmMim() {
 }
 
 function escolher(v: VendedorMapa) {
+  // Tocar de novo no mesmo vendedor fecha o card.
+  if (selecionado.value === v.slug) {
+    selecionado.value = null
+    return
+  }
   selecionado.value = v.slug
   if (v.localizacao) mapa.value?.irPara(v.localizacao)
 }
