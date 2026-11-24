@@ -220,13 +220,9 @@ watch(produtos, (lista) => {
       <span class="seta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
     </NuxtLink>
 
-    <div v-if="v.status !== 'fora_de_atividade'" class="cta">
-      <NuxtLink
-        :to="contagem ? `/v/${slug}/reservar` : ''"
-        class="reservar"
-        :class="{ off: !contagem }"
-        :aria-disabled="!contagem"
-      >
+    <!-- Só aparece com itens: vazio, o botão flutuante cobria o conteúdo sem servir para nada. -->
+    <div v-if="v.status !== 'fora_de_atividade' && contagem" class="cta">
+      <NuxtLink :to="`/v/${slug}/reservar`" class="reservar">
         <span class="reservar-texto">Reservar · {{ contagem }} {{ contagem === 1 ? 'item' : 'itens' }}</span>
         <span>{{ formatarBRL(total) }}</span>
         <span class="reservar-seta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></span>
@@ -330,6 +326,5 @@ watch(produtos, (lista) => {
 }
 .reservar-texto { flex: 1; }
 .reservar-seta { width: 48px; height: 48px; border-radius: 50%; background: #111111; color: var(--destaque); display: flex; align-items: center; justify-content: center; }
-.off { pointer-events: none; opacity: .45; }
 .falha { padding: 48px 16px; gap: 16px; }
 </style>
