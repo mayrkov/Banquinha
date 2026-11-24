@@ -19,6 +19,8 @@ const metodoCartao = ref<'credito' | 'debito'>('debito')
 const idLocal = ref('')
 const qrPix = ref('')
 const aviso = ref('')
+// Lista de itens recolhida por padrão: aberta, ela cobria a grade de sabores no celular.
+const itensAbertos = ref(false)
 
 const ativos = computed(() => produtos.value.filter(p => p.ativo))
 const reservado = (id: number) => produtos.value.find(p => p.id === id)?.reservado ?? 0
@@ -49,6 +51,7 @@ function mudarPreco(id: number, texto: string) {
 
 function limpar() {
   carrinho.value = new Map()
+  itensAbertos.value = false
   etapa.value = 'carrinho'
   localStorage.removeItem(CHAVE_COBRANCA)
 }
@@ -150,6 +153,18 @@ onMounted(async () => {
     </p>
 
     <div class="bloco bloco-preto rodape">
+      <button
+        v-if="itens.length"
+        type="button"
+        class="ver-itens"
+        :aria-expanded="itensAbertos"
+        aria-controls="itens-venda"
+        @click="itensAbertos = !itensAbertos"
+      >
+        <span>{{ itensAbertos ? 'Ocultar itens' : 'Ajustar itens' }} ({{ itens.length }})</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true" :class="{ virado: itensAbertos }"><path d="M6 15l6-6 6 6" /></svg>
+      </button>
+      <div v-show="itensAbertos" id="itens-venda" class="linhas">
       <div v-for="[id, item] in itens" :key="id" class="linha">
         <div class="linha-nome">
           <span>{{ nome(id) }}</span>
@@ -168,6 +183,7 @@ onMounted(async () => {
           <span class="num">{{ item.quantidade }}</span>
           <button class="mais" :aria-label="`Adicionar um ${nome(id)}`" :disabled="item.quantidade >= disponivel(id)" @click="somar(id, 1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
         </div>
+      </div>
       </div>
 
       <div class="total">
@@ -261,6 +277,11 @@ onMounted(async () => {
 .sabor-nome { font-size: 18px; font-weight: 600; line-height: 1.1; }
 .sabor-info { font-size: 13px; opacity: .75; }
 .rodape { margin-top: auto; position: sticky; bottom: 88px; gap: 14px; }
+.ver-itens { min-height: 44px; margin: -6px 0; padding: 0; border: 0; background: none; color: inherit; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; }
+.ver-itens svg { transition: transform .2s; }
+.ver-itens svg.virado { transform: rotate(180deg); }
+/* Mesmo aberta, a lista rola dentro do bloco para a grade continuar visível. */
+.linhas { max-height: 32dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
 .linha { display: flex; align-items: center; gap: 10px; }
 .linha-nome { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 16px; font-weight: 500; min-width: 0; }
 .preco { font-size: 13px; color: #A6A6A6; display: flex; align-items: center; gap: 4px; }
@@ -272,7 +293,7 @@ onMounted(async () => {
 .mais { background: #FFFFFF; color: #111111; }
 .num { width: 26px; text-align: center; font-size: 18px; font-weight: 600; }
 .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; border-top: 1px solid #2A2A2A; font-size: 14px; color: #A6A6A6; }
-.linha + .total, .total:first-child { border-top: 0; padding-top: 0; }
+.total:first-child { border-top: 0; padding-top: 0; }
 .total strong { font-size: 34px; font-weight: 600; color: var(--destaque); letter-spacing: -0.5px; }
 .formas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .formas .btn { min-height: 56px; padding: 0 4px; font-size: 15px; }
